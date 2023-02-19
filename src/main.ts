@@ -37,11 +37,6 @@ ptrEventEmitter.publish("init", {
   ...store.getState(),
 });
 
-// store.subscribe(
-//   ({ dm }) => dm.displayWidth_px,
-//   displayCols => console.log(`displayWidth_px is ${displayCols}`)
-// );
-
 store.subscribe(
   ({ dm }) => dm.displayColumns,
   displayCols => {
