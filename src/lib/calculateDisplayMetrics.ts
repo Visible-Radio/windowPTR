@@ -16,7 +16,7 @@ export default function calculateDisplayMetrics(
   charWidth: number,
   root: HTMLDivElement,
   options = canvasConfigOptionsDefault
-) {
+): DisplayMetrics {
   const { scale, displayRows, gridSpaceX_du, gridSpaceY_du, borderColor } =
     options;
 

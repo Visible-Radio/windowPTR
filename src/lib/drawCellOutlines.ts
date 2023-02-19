@@ -1,7 +1,9 @@
-import configureCanvas from "./configureCanvas";
+import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
+import { useDrawingTools } from "./makeDrawingTools";
 
 export default function drawCellOutlines(
-  canvasBundle: ReturnType<typeof configureCanvas>
+  getTools: ReturnType<typeof useDrawingTools>,
+  dm: DisplayMetrics
 ) {
   const {
     drawAreaLeft_du,
@@ -12,9 +14,10 @@ export default function drawCellOutlines(
     gridSpaceX_du,
     displayColumns,
     displayRows,
-  } = canvasBundle.dm;
+    scale,
+  } = dm;
 
-  const { ctx, strokeRect_du } = canvasBundle;
+  const { strokeRect_du, ctx } = getTools(scale);
 
   ctx.lineWidth = 1;
 
@@ -28,5 +31,5 @@ export default function drawCellOutlines(
       );
     }
   }
-  return canvasBundle;
+  return { ctx, dm };
 }

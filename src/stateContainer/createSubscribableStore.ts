@@ -44,6 +44,7 @@ export function createSubscribableStore<
 
       if (
         /* swap this for a proper deep equal comparison */
+        /* we may need to store functions in state - ctx and our drawing tools */
         JSON.stringify(currentSelectorResult) !==
         JSON.stringify(prevSelectorResult)
       ) {

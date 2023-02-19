@@ -1,8 +1,10 @@
-import configureCanvas from "./configureCanvas";
+import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
 import { rgbToString } from "./init";
+import { useDrawingTools } from "./makeDrawingTools";
 
 export default function drawBorder(
-  canvasBundle: ReturnType<typeof configureCanvas>
+  getTools: ReturnType<typeof useDrawingTools>,
+  dm: DisplayMetrics
 ) {
   const {
     borderColor,
@@ -10,9 +12,8 @@ export default function drawBorder(
     scale,
     displayHeight_du,
     displayWidth_du,
-  } = canvasBundle.dm;
-
-  const { ctx, strokeRect_du } = canvasBundle;
+  } = dm;
+  const { strokeRect_du, ctx } = getTools(scale);
 
   ctx.strokeStyle = rgbToString(borderColor);
   ctx.lineWidth = borderWidth_du * scale;
@@ -24,5 +25,5 @@ export default function drawBorder(
     displayHeight_du - borderWidth_du
   );
 
-  return canvasBundle;
+  return { ctx, dm };
 }

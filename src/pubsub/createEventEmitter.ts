@@ -30,6 +30,7 @@ export default function createEventEmitter<EventMap>() {
     data: EventMap[EventName]
   ) => {
     const cbs = subscribers[name];
+    if (!cbs) return;
     let propagate = true;
 
     const event = {

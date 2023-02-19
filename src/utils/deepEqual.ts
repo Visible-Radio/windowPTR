@@ -1,28 +1,28 @@
-export default function deepEqual(a: object, b: object) {
-  if (
-    typeof a === "object" &&
-    typeof b === "object" &&
-    a !== null &&
-    b !== null
-  )
-    // args were objects other than null
-    return Object.keys(a).reduce((acc, key) => {
-      // a[key] could be a primitive or an object
-      // if it is an object, return deepEqual(a[key], b[key], [...keyPath, key])
-      if (typeof a[key] === "object" && a[key] !== null) {
-        if (b.hasOwnProperty(key)) {
-          return deepEqual(a[key], b[key]);
-        } else {
-          return acc && false;
-        }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function deepEqual(a: any, b: any): boolean {
+  if (a === b) {
+    // skip other comparisons if same memory reference or primitives
+    return true;
+  }
+  if (a && b && typeof a === "object" && typeof b === "object") {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    if (aKeys.length === 0 && bKeys.length === 0) return true;
+    if (aKeys.length !== bKeys.length) return false;
+    if (bKeys.some(k => !aKeys.includes(k))) return false;
+
+    for (const key of aKeys) {
+      if (!bKeys.includes(key)) return false;
+      if (!deepEqual(a[key], b[key])) {
+        return false;
       }
-      // if it is a primitive, compare it to b[key]
-      if (a[key] === b[key]) {
-        return acc && true;
-      } else {
-        return acc && false;
-      }
-    }, true);
-  // args were primities
-  return a === b;
+    }
+    return true;
+  }
+
+  if (typeof a !== typeof b) return false;
+  if (typeof a === "function" && typeof b === "function") {
+    return a.toString() === b.toString();
+  }
+  return false;
 }

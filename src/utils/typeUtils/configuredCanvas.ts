@@ -1,6 +1,6 @@
 import { rgb8Bit } from "./intRange";
 
-export type DisplayMetrics = {
+export type DisplayMetrics = Readonly<{
   borderColor: rgb8Bit;
   /**
    * horizontal grid gap in Display Units between character cells
@@ -77,4 +77,4 @@ export type DisplayMetrics = {
    */
   cellHeight_du: number;
   scale: number;
-};
+}>;
