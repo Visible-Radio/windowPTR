@@ -37,10 +37,10 @@ ptrEventEmitter.publish("init", {
   ...store.getState(),
 });
 
-store.subscribe(
-  ({ dm }) => dm.displayWidth_px,
-  displayCols => console.log(`displayWidth_px is ${displayCols}`)
-);
+// store.subscribe(
+//   ({ dm }) => dm.displayWidth_px,
+//   displayCols => console.log(`displayWidth_px is ${displayCols}`)
+// );
 
 store.subscribe(
   ({ dm }) => dm.displayColumns,
@@ -65,6 +65,7 @@ function onWindowResize() {
     {
       ...canvasConfigOptionsDefault,
       scale: store.getState().dm.scale,
+      displayRows: store.getState().dm.displayRows,
     }
   );
   if (store.getState().dm.displayColumns !== newDm.displayColumns) {
@@ -81,17 +82,56 @@ store.setState(prev => ({
 }));
 
 function setScale(userScale: number) {
+  if (userScale < 1) throw new Error("cannot set scale less than 1");
+  if (userScale > 10) throw new Error("cannot set scale greater than 10");
   store.setState(prev => ({
     ...prev,
     dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
       ...canvasConfigOptionsDefault,
       scale: userScale,
+      displayRows: prev.dm.displayRows,
+      gridSpaceX_du: prev.dm.gridSpaceX_du,
+      gridSpaceY_du: prev.dm.gridSpaceY_du,
+    }),
+  }));
+}
+
+function setRows(userDisplayRows: number) {
+  if (userDisplayRows < 1)
+    throw new Error("cannot set display rows less than 1");
+  if (userDisplayRows > 40)
+    throw new Error("cannot set display rows greater than 40");
+  store.setState(prev => ({
+    ...prev,
+    dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
+      ...canvasConfigOptionsDefault,
+      scale: prev.dm.scale,
+      displayRows: userDisplayRows,
+      gridSpaceX_du: prev.dm.gridSpaceX_du,
+      gridSpaceY_du: prev.dm.gridSpaceY_du,
+    }),
+  }));
+}
+
+function setGridSpace(userGridSpace: number) {
+  if (userGridSpace < 0) throw new Error("cannot set negative gridSpace");
+  if (userGridSpace > 5) throw new Error("cannot set gridSpace greater than 5");
+  store.setState(prev => ({
+    ...prev,
+    dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
+      ...canvasConfigOptionsDefault,
+      scale: prev.dm.scale,
+      displayRows: prev.dm.displayRows,
+      gridSpaceX_du: userGridSpace,
+      gridSpaceY_du: userGridSpace,
     }),
   }));
 }
 
 const PTR = {
   setScale,
+  setRows,
+  setGridSpace,
 };
 
 window._PTR = PTR;
