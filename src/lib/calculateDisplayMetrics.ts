@@ -11,6 +11,9 @@ export const canvasConfigOptionsDefault = {
 
 /**
  * Calculates displays metrics based on the size of the root element, options, and character def width
+ * @params charWidth - the width of the characters in display units
+ * @params root - the root div element
+ * @params options - options for scale, number of rows, grid gap and color
  */
 export default function calculateDisplayMetrics(
   charWidth: number,

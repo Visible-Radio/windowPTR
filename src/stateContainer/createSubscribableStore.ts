@@ -1,6 +1,4 @@
-type Ref = {
-  current: string;
-};
+import deepEqual from "../utils/deepEqual";
 
 export function createSubscribableStore<
   StoreType extends boolean | string | number | Record<string, unknown>
@@ -13,7 +11,12 @@ export function createSubscribableStore<
   >();
 
   function subscribe<
-    SelectorResult extends boolean | string | number | Record<string, unknown>
+    SelectorResult extends
+      | boolean
+      | string
+      | number
+      | Record<string, unknown>
+      | unknown[]
   >(
     selector: (state: StoreType) => SelectorResult,
     cb: (selectorResult: SelectorResult) => void
@@ -42,12 +45,7 @@ export function createSubscribableStore<
     for (const [cb, { selector, prevSelectorResult }] of subscribers) {
       const currentSelectorResult = selector(state);
 
-      if (
-        /* swap this for a proper deep equal comparison */
-        /* we may need to store functions in state - ctx and our drawing tools */
-        JSON.stringify(currentSelectorResult) !==
-        JSON.stringify(prevSelectorResult)
-      ) {
+      if (!deepEqual(currentSelectorResult, prevSelectorResult)) {
         subscribers.set(cb, {
           selector,
           prevSelectorResult: currentSelectorResult,
