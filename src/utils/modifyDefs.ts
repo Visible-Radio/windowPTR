@@ -1,20 +1,6 @@
-import { int8Bit } from "../utils/typeUtils/intRange";
-import customDefs from "./customDefs_charWidth_7";
+import customDefs_charWidth_7 from "../lib/customDefs_charWidth_7";
 
-export function makeCanvas(container: HTMLDivElement) {
-  const canvas = document.createElement("canvas");
-  canvas.setAttribute("id", "__PTRwindow_canvas_element");
-  canvas.style.outline = `1px solid blue`;
-  container.appendChild(canvas);
-  return canvas;
-}
-
-export function rgbToString(rgbArr: [int8Bit, int8Bit, int8Bit]) {
-  const [r, g, b] = rgbArr;
-  return `rgb(${r},${g},${b})`;
-}
-
-export function modifyDefs(defs: typeof customDefs) {
+export function modifyDefs(defs: typeof customDefs_charWidth_7) {
   return Object.fromEntries(
     Object.entries(defs).map(([key, value]) => {
       if (key === "charWidth" && typeof value === "number") {

@@ -1,4 +1,3 @@
-import { makeCanvas, modifyDefs } from "./lib/init";
 import configureCanvas from "./lib/configureCanvas";
 import customDefs from "./lib/customDefs_charWidth_7";
 import drawBorder from "./lib/drawBorder";
@@ -9,6 +8,11 @@ import calculateDisplayMetrics, {
 import { createSubscribableStore } from "./stateContainer/createSubscribableStore";
 import { useDrawingTools } from "./lib/makeDrawingTools";
 import { ptrEventEmitter } from "./pubsub/ptrEmitter";
+import { modifyDefs } from "./utils/modifyDefs";
+import { makeCanvas } from "./utils/makeCanvas";
+import { DisplayMetrics } from "./utils/typeUtils/configuredCanvas";
+import { gridPositionFromIndex } from "./utils/gridPositionFromIndex";
+import { rgbToString } from "./utils/rgbToString";
 
 const charDefs = modifyDefs(customDefs);
 const initRoot = document.getElementById("root") as HTMLDivElement;
@@ -21,6 +25,9 @@ const store = createSubscribableStore({
   root: initRoot,
   ctx: initCtx,
   getTools: intDrawingTools,
+  simpleText: "The sky was the color of television tuned to a dead channel",
+  scrollY_du: 0,
+  layoutList: [],
 });
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
@@ -28,8 +35,16 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
   const dm = calculateDisplayMetrics(charDefs.charWidth, root);
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
-  drawCellOutlines(getTools, dm);
+  // drawCellOutlines(getTools, dm);
   window.addEventListener("resize", onWindowResize);
+  window.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") {
+      scrollDown();
+    } else if (e.key === "ArrowUp") {
+      scrollUp();
+    }
+  });
+
   store.setState(prev => ({ ...prev, dm }));
 });
 
@@ -38,20 +53,133 @@ ptrEventEmitter.publish("init", {
 });
 
 store.subscribe(
-  ({ dm }) => dm.displayColumns,
-  displayCols => {
-    console.log(`display cols are ${displayCols}`);
+  ({ dm, ctx, getTools }) => ({ dm, ctx, getTools }),
+  syncDisplayWithMetrics
+);
+
+store.subscribe(
+  ({ dm, simpleText }) => ({ dm, simpleText }),
+  ({ dm, simpleText }) => {
+    store.setState({ layoutList: layoutPage({ dm, simpleText }) });
   }
 );
 
 store.subscribe(
-  ({ dm, ctx, getTools }) => ({ dm, ctx, getTools }),
-  ({ dm, ctx, getTools }) => {
-    configureCanvas(ctx, dm);
-    drawBorder(getTools, dm);
-    drawCellOutlines(getTools, dm);
+  ({ layoutList }) => ({ layoutList }),
+  ({ layoutList }) => {
+    drawScreen(layoutList);
   }
 );
+
+store.subscribe(
+  ({ scrollY_du }) => ({ scrollY_du }),
+  () => {
+    drawScreen(store.getState().layoutList);
+  }
+);
+
+function drawScreen(layoutList: ReturnType<typeof layoutPage>) {
+  const { getTools, charDefs, dm, scrollY_du } = store.getState();
+  const { ctx, fillRect_du, clearRect_du } = getTools(dm.scale);
+  ctx.fillStyle = rgbToString(dm.borderColor);
+  ctx.lineWidth = dm.scale;
+  clearRect_du(
+    dm.drawAreaLeft_du,
+    dm.drawAreaTop_du,
+    dm.drawAreaRight_du,
+    dm.drawAreaBottom_du
+  );
+  for (const { x: cursorX_du, y: cursorY_du, char } of layoutList) {
+    /*
+    TODO: Remove the "magic number" in the check below
+     */
+    if (
+      cursorY_du > scrollY_du + dm.drawAreaHeight_du ||
+      cursorY_du + dm.cellHeight_du - 4 < scrollY_du
+    ) {
+      console.log("math above is a bit off", char);
+      continue;
+    }
+
+    const c = char.toUpperCase() in charDefs ? char.toUpperCase() : " ";
+
+    charDefs[c].forEach(point => {
+      const { x, y } = gridPositionFromIndex({
+        index: point,
+        columns: dm.cellWidth_du,
+      });
+      const adjustedX = x + cursorX_du;
+      const adjustedY = y + cursorY_du - scrollY_du;
+
+      if (
+        !(adjustedY > dm.drawAreaBottom_du + 1 || adjustedY < dm.drawAreaTop_du)
+      ) {
+        // prevent drawing pixels in top and bottom gutters
+        fillRect_du(adjustedX, adjustedY, 1, 1);
+      }
+    });
+  }
+}
+
+interface syncDisplayWithMetricsArgs extends Record<string, unknown> {
+  dm: DisplayMetrics;
+  ctx: CanvasRenderingContext2D;
+  getTools: ReturnType<typeof useDrawingTools>;
+}
+
+/** Sets the size of the canvas element in accordance with display metrics, draws the border, and cell outlines */
+function syncDisplayWithMetrics({
+  dm,
+  ctx,
+  getTools,
+}: syncDisplayWithMetricsArgs) {
+  configureCanvas(ctx, dm);
+  drawBorder(getTools, dm);
+  // drawCellOutlines(getTools, dm);
+}
+
+function lex(document: string) {
+  /** string being built */
+  let text = "";
+  /** whether or not the current character is between a pair of angle brackets  */
+  let inAngle = false;
+  for (const char of document) {
+    if (char === "<") {
+      inAngle = true;
+    } else if (char === ">") {
+      inAngle = false;
+    } else if (!inAngle) {
+      text += char;
+    }
+  }
+  return text;
+}
+
+interface layoutPageArgs {
+  simpleText: ReturnType<typeof store.getState>["simpleText"];
+  dm: DisplayMetrics;
+}
+
+function layoutPage({ simpleText, dm }: layoutPageArgs) {
+  const displayList = [];
+  const xStep = dm.cellWidth_du + dm.gridSpaceX_du;
+  const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
+  const lastColumnXCoord = dm.getColumnXCoord_du(dm.displayColumns - 1);
+  let cursorX_du = dm.drawAreaLeft_du;
+  let cursorY_du = dm.drawAreaTop_du;
+
+  for (const char of simpleText) {
+    displayList.push({ x: cursorX_du, y: cursorY_du, char });
+
+    if (cursorX_du >= lastColumnXCoord) {
+      cursorX_du = dm.drawAreaLeft_du;
+      cursorY_du += yStep;
+    } else {
+      cursorX_du += xStep;
+    }
+  }
+  return displayList;
+}
 
 function onWindowResize() {
   const newDm = calculateDisplayMetrics(
@@ -67,14 +195,6 @@ function onWindowResize() {
     store.setState(prev => ({ ...prev, dm: newDm }));
   }
 }
-
-store.setState(prev => ({
-  ...prev,
-  dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
-    ...canvasConfigOptionsDefault,
-    scale: 5,
-  }),
-}));
 
 function setScale(userScale: number) {
   if (userScale < 1) throw new Error("cannot set scale less than 1");
@@ -123,10 +243,37 @@ function setGridSpace(userGridSpace: number) {
   }));
 }
 
+function setScroll(scrollValue: number) {
+  store.setState(prev => ({
+    ...prev,
+    scrollY_du: scrollValue,
+  }));
+}
+
+function scrollDown() {
+  store.setState(prev => ({
+    ...prev,
+    scrollY_du: prev.scrollY_du + 1,
+  }));
+}
+
+function scrollUp() {
+  store.setState(prev => ({
+    ...prev,
+    scrollY_du: prev.scrollY_du - 1,
+  }));
+}
+
 const PTR = {
   setScale,
   setRows,
   setGridSpace,
+  setScroll,
+  scrollDown,
+  scrollUp,
+  setSimpleText(text: string) {
+    store.setState(prev => ({ ...prev, simpleText: text }));
+  },
 };
 
 window._PTR = PTR;

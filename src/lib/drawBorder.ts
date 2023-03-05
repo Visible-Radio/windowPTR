@@ -1,5 +1,6 @@
+import { rgbToString } from "../utils/rgbToString";
 import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
-import { rgbToString } from "./init";
+
 import { useDrawingTools } from "./makeDrawingTools";
 
 export default function drawBorder(

@@ -67,6 +67,18 @@ export type DisplayMetrics = Readonly<{
    */
   drawAreaTop_du: number;
 
+  /** x coordinate in Display units for the right edge of the draw area */
+  drawAreaRight_du: number;
+
+  /** y coordinate in Display units for the bottom edge of the draw area */
+  drawAreaBottom_du: number;
+
+  /** width of the draw area in Display units */
+  drawAreaWidth_du: number;
+
+  /** height of the draw area in Display units */
+  drawAreaHeight_du: number;
+
   /**
    * width in Display Units of each character cell. Does not include gridSpaceX
    */
@@ -77,4 +89,7 @@ export type DisplayMetrics = Readonly<{
    */
   cellHeight_du: number;
   scale: number;
+
+  /** Determines the x cooridinate of the given column. Input is zero indexed. */
+  getColumnXCoord_du: (columnNo: number) => number;
 }>;

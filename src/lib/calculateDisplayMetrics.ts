@@ -2,8 +2,8 @@ import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
 import { rgb8Bit } from "../utils/typeUtils/intRange";
 
 export const canvasConfigOptionsDefault = {
-  scale: 8,
-  displayRows: 3,
+  scale: 3,
+  displayRows: 5,
   gridSpaceX_du: 1, // measured in DUs
   gridSpaceY_du: 1, // measured in DUs
   borderColor: [200, 0, 120] as rgb8Bit,
@@ -45,8 +45,7 @@ export default function calculateDisplayMetrics(
     numberOfRowGaps * gridSpaceY_du;
 
   const displayHeight_px = displayHeight_du * scale;
-  const drawAreaLeft_du = borderWidth_du + borderGutter_du;
-  const drawAreaTop_du = borderWidth_du + borderGutter_du;
+
   const cellWidth_du = charWidth;
   const cellHeight_du = charWidth;
 
@@ -56,6 +55,22 @@ export default function calculateDisplayMetrics(
     totalBorderWidth_du;
 
   const displayWidth_px = displayWidth_du * scale;
+
+  const drawAreaLeft_du = borderWidth_du + borderGutter_du;
+  const drawAreaTop_du = borderWidth_du + borderGutter_du;
+
+  const drawAreaRight_du =
+    displayWidth_du - (borderGutter_du + borderWidth_du) * 2;
+
+  const drawAreaBottom_du =
+    displayHeight_du - (borderGutter_du + borderWidth_du) * 2;
+
+  const drawAreaWidth_du = drawAreaRight_du - drawAreaLeft_du;
+
+  const drawAreaHeight_du = drawAreaBottom_du - drawAreaTop_du;
+
+  // could also add lastColumnXCoord_du
+  // or even an array of all column xCoords
 
   const displayMetrics: DisplayMetrics = {
     displayWidth_px,
@@ -75,8 +90,17 @@ export default function calculateDisplayMetrics(
     borderColor,
     drawAreaLeft_du,
     drawAreaTop_du,
+    drawAreaRight_du,
+    drawAreaBottom_du,
+    drawAreaWidth_du,
+    drawAreaHeight_du,
     cellWidth_du,
     cellHeight_du,
+    getColumnXCoord_du(columnNo: number) {
+      return (
+        columnNo * cellWidth_du + gridSpaceX_du * columnNo + drawAreaLeft_du
+      );
+    },
   };
 
   return displayMetrics;
