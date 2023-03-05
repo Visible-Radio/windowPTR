@@ -2,8 +2,8 @@ import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
 import { rgb8Bit } from "../utils/typeUtils/intRange";
 
 export const canvasConfigOptionsDefault = {
-  scale: 3,
-  displayRows: 5,
+  scale: 5,
+  displayRows: 3,
   gridSpaceX_du: 1, // measured in DUs
   gridSpaceY_du: 1, // measured in DUs
   borderColor: [200, 0, 120] as rgb8Bit,
@@ -63,7 +63,7 @@ export default function calculateDisplayMetrics(
     displayWidth_du - (borderGutter_du + borderWidth_du) * 2;
 
   const drawAreaBottom_du =
-    displayHeight_du - (borderGutter_du + borderWidth_du) * 2;
+    displayHeight_du - (borderGutter_du + borderWidth_du);
 
   const drawAreaWidth_du = drawAreaRight_du - drawAreaLeft_du;
 

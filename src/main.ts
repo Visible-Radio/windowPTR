@@ -17,25 +17,30 @@ import { rgbToString } from "./utils/rgbToString";
 const charDefs = modifyDefs(customDefs);
 const initRoot = document.getElementById("root") as HTMLDivElement;
 const initCtx = makeCanvas(initRoot).getContext("2d")!;
+const initText =
+  "The sky was the color of a television tuned to a dead channel";
+const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
 const intDrawingTools = useDrawingTools(initCtx);
 
 const store = createSubscribableStore({
-  dm: calculateDisplayMetrics(charDefs.charWidth, initRoot),
+  dm: initDm,
   charDefs,
   root: initRoot,
   ctx: initCtx,
   getTools: intDrawingTools,
-  simpleText: "The sky was the color of television tuned to a dead channel",
+  simpleText: initText,
   scrollY_du: 0,
   layoutList: [],
 });
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
-  const { getTools, ctx, charDefs, root } = data;
+  const { getTools, ctx, charDefs, root, simpleText } = data;
   const dm = calculateDisplayMetrics(charDefs.charWidth, root);
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
   // drawCellOutlines(getTools, dm);
+  const layoutList = layoutPage({ simpleText, dm });
+  drawScreen(layoutList);
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") {
@@ -45,7 +50,7 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
     }
   });
 
-  store.setState(prev => ({ ...prev, dm }));
+  store.setState(prev => ({ ...prev, dm, layoutList }));
 });
 
 ptrEventEmitter.publish("init", {
@@ -87,7 +92,7 @@ function drawScreen(layoutList: ReturnType<typeof layoutPage>) {
     dm.drawAreaLeft_du,
     dm.drawAreaTop_du,
     dm.drawAreaRight_du,
-    dm.drawAreaBottom_du
+    dm.drawAreaHeight_du
   );
   for (const { x: cursorX_du, y: cursorY_du, char } of layoutList) {
     /*
@@ -97,7 +102,6 @@ function drawScreen(layoutList: ReturnType<typeof layoutPage>) {
       cursorY_du > scrollY_du + dm.drawAreaHeight_du ||
       cursorY_du + dm.cellHeight_du - 4 < scrollY_du
     ) {
-      console.log("math above is a bit off", char);
       continue;
     }
 
@@ -112,7 +116,7 @@ function drawScreen(layoutList: ReturnType<typeof layoutPage>) {
       const adjustedY = y + cursorY_du - scrollY_du;
 
       if (
-        !(adjustedY > dm.drawAreaBottom_du + 1 || adjustedY < dm.drawAreaTop_du)
+        !(adjustedY >= dm.drawAreaBottom_du || adjustedY < dm.drawAreaTop_du)
       ) {
         // prevent drawing pixels in top and bottom gutters
         fillRect_du(adjustedX, adjustedY, 1, 1);
@@ -251,16 +255,26 @@ function setScroll(scrollValue: number) {
 }
 
 function scrollDown() {
-  store.setState(prev => ({
-    ...prev,
-    scrollY_du: prev.scrollY_du + 1,
-  }));
+  /*
+  TODO: determine the maximum scroll amount
+   */
+  store.setState(prev => {
+    const { drawAreaTop_du } = prev.dm;
+    const { scrollY_du, layoutList } = prev;
+
+    const maxScroll = layoutList.at(-1).y - drawAreaTop_du;
+
+    return {
+      ...prev,
+      scrollY_du: scrollY_du >= maxScroll ? scrollY_du : scrollY_du + 1,
+    };
+  });
 }
 
 function scrollUp() {
   store.setState(prev => ({
     ...prev,
-    scrollY_du: prev.scrollY_du - 1,
+    scrollY_du: prev.scrollY_du > 0 ? prev.scrollY_du - 1 : prev.scrollY_du,
   }));
 }
 
