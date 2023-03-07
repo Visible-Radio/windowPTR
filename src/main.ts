@@ -44,9 +44,11 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") {
-      scrollDown();
+      // scrollDown();
+      scrollDownOneRow();
     } else if (e.key === "ArrowUp") {
-      scrollUp();
+      // scrollUp();
+      scrollUpOneRow();
     }
   });
 
@@ -255,9 +257,6 @@ function setScroll(scrollValue: number) {
 }
 
 function scrollDown() {
-  /*
-  TODO: determine the maximum scroll amount
-   */
   store.setState(prev => {
     const { drawAreaTop_du } = prev.dm;
     const { scrollY_du, layoutList } = prev;
@@ -269,6 +268,33 @@ function scrollDown() {
       scrollY_du: scrollY_du >= maxScroll ? scrollY_du : scrollY_du + 1,
     };
   });
+}
+
+function scrollDownOneRow() {
+  const { layoutList, scrollY_du, dm } = store.getState();
+  const targetScroll = Math.min(
+    scrollY_du + 10,
+    layoutList.at(-1).y - dm.drawAreaTop_du
+  );
+  const timerId = setInterval(() => {
+    if (targetScroll > store.getState().scrollY_du) {
+      scrollDown();
+    } else {
+      clearInterval(timerId);
+    }
+  }, 16);
+}
+
+function scrollUpOneRow() {
+  // need to check we're not already at the top.
+  const targetScroll = Math.max(0, store.getState().scrollY_du - 10); // magic number;
+  const timerId = setInterval(() => {
+    if (targetScroll < store.getState().scrollY_du) {
+      scrollUp();
+    } else {
+      clearInterval(timerId);
+    }
+  }, 16);
 }
 
 function scrollUp() {
