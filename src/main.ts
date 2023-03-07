@@ -272,8 +272,9 @@ function scrollDown() {
 
 function scrollDownOneRow() {
   const { layoutList, scrollY_du, dm } = store.getState();
+  const step = dm.cellHeight_du + dm.gridSpaceY_du;
   const targetScroll = Math.min(
-    scrollY_du + 10,
+    scrollY_du + step,
     layoutList.at(-1).y - dm.drawAreaTop_du
   );
   const timerId = setInterval(() => {
@@ -282,19 +283,21 @@ function scrollDownOneRow() {
     } else {
       clearInterval(timerId);
     }
-  }, 16);
+  }, 15);
 }
 
 function scrollUpOneRow() {
-  // need to check we're not already at the top.
-  const targetScroll = Math.max(0, store.getState().scrollY_du - 10); // magic number;
+  const { scrollY_du, dm } = store.getState();
+  const step = dm.cellHeight_du + dm.gridSpaceY_du;
+
+  const targetScroll = Math.max(0, scrollY_du - step);
   const timerId = setInterval(() => {
     if (targetScroll < store.getState().scrollY_du) {
       scrollUp();
     } else {
       clearInterval(timerId);
     }
-  }, 16);
+  }, 15);
 }
 
 function scrollUp() {
