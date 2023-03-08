@@ -18,7 +18,7 @@ const charDefs = modifyDefs(customDefs);
 const initRoot = document.getElementById("root") as HTMLDivElement;
 const initCtx = makeCanvas(initRoot).getContext("2d")!;
 const initText =
-  "The sky was the color of a television tuned to a dead channel";
+  "The sky was the color of a television\n\n tuned to a dead channel";
 const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
 const intDrawingTools = useDrawingTools(initCtx);
 
@@ -141,6 +141,7 @@ function syncDisplayWithMetrics({
 }: syncDisplayWithMetricsArgs) {
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
+  drawScreen(store.getState().layoutList);
   // drawCellOutlines(getTools, dm);
 }
 
@@ -176,6 +177,19 @@ function layoutPage({ simpleText, dm }: layoutPageArgs) {
 
   for (const char of simpleText) {
     displayList.push({ x: cursorX_du, y: cursorY_du, char });
+
+    if (char === "\n") {
+      // jump to a new row on \n
+      // this is quick and dirty. We may actually want newlines in the layoutList
+      cursorX_du = dm.drawAreaLeft_du;
+      cursorY_du += yStep;
+      continue;
+    }
+
+    if (cursorX_du === dm.getColumnXCoord_du(0) && char === " ") {
+      // omit spaces at the start of a row
+      continue;
+    }
 
     if (cursorX_du >= lastColumnXCoord) {
       cursorX_du = dm.drawAreaLeft_du;
@@ -270,7 +284,9 @@ function scrollDown() {
   });
 }
 
+let isScrolling = false;
 function scrollDownOneRow() {
+  if (isScrolling) return;
   const { layoutList, scrollY_du, dm } = store.getState();
   const step = dm.cellHeight_du + dm.gridSpaceY_du;
   const targetScroll = Math.min(
@@ -279,22 +295,27 @@ function scrollDownOneRow() {
   );
   const timerId = setInterval(() => {
     if (targetScroll > store.getState().scrollY_du) {
+      isScrolling = true;
       scrollDown();
     } else {
+      isScrolling = false;
       clearInterval(timerId);
     }
   }, 15);
 }
 
 function scrollUpOneRow() {
+  if (isScrolling) return;
   const { scrollY_du, dm } = store.getState();
   const step = dm.cellHeight_du + dm.gridSpaceY_du;
 
   const targetScroll = Math.max(0, scrollY_du - step);
   const timerId = setInterval(() => {
     if (targetScroll < store.getState().scrollY_du) {
+      isScrolling = true;
       scrollUp();
     } else {
+      isScrolling = false;
       clearInterval(timerId);
     }
   }, 15);
