@@ -22,7 +22,18 @@ const initText =
 const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
 const intDrawingTools = useDrawingTools(initCtx);
 
-const store = createSubscribableStore({
+interface MainStoreState {
+  layoutList: SimpleLayoutObject[];
+  dm: DisplayMetrics;
+  charDefs: ReturnType<typeof modifyDefs>;
+  root: HTMLDivElement;
+  ctx: CanvasRenderingContext2D;
+  getTools: ReturnType<typeof useDrawingTools>;
+  simpleText: string;
+  scrollY_du: number;
+}
+
+const mainStoreTemplateState = {
   dm: initDm,
   charDefs,
   root: initRoot,
@@ -30,8 +41,10 @@ const store = createSubscribableStore({
   getTools: intDrawingTools,
   simpleText: initText,
   scrollY_du: 0,
-  layoutList: [],
-});
+  layoutList: [] as SimpleLayoutObject[],
+};
+
+const store = createSubscribableStore(mainStoreTemplateState);
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
   const { getTools, ctx, charDefs, root, simpleText } = data;
@@ -39,7 +52,7 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
   // drawCellOutlines(getTools, dm);
-  const layoutList = layoutPage({ simpleText, dm });
+  const layoutList = layoutPageByWord({ simpleText, dm });
   drawScreen(layoutList);
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
@@ -67,7 +80,7 @@ store.subscribe(
 store.subscribe(
   ({ dm, simpleText }) => ({ dm, simpleText }),
   ({ dm, simpleText }) => {
-    store.setState({ layoutList: layoutPage({ dm, simpleText }) });
+    store.setState({ layoutList: layoutPageByWord({ dm, simpleText }) });
   }
 );
 
@@ -85,7 +98,7 @@ store.subscribe(
   }
 );
 
-function drawScreen(layoutList: ReturnType<typeof layoutPage>) {
+function drawScreen(layoutList: SimpleLayoutObject[]) {
   const { getTools, charDefs, dm, scrollY_du } = store.getState();
   const { ctx, fillRect_du, clearRect_du } = getTools(dm.scale);
   ctx.fillStyle = rgbToString(dm.borderColor);
@@ -96,20 +109,21 @@ function drawScreen(layoutList: ReturnType<typeof layoutPage>) {
     dm.drawAreaRight_du,
     dm.drawAreaHeight_du
   );
+
   for (const { x: cursorX_du, y: cursorY_du, char } of layoutList) {
-    /*
-    TODO: Remove the "magic number" in the check below
-     */
     if (
       cursorY_du > scrollY_du + dm.drawAreaHeight_du ||
       cursorY_du + dm.cellHeight_du - 4 < scrollY_du
     ) {
+      /*
+      TODO: Remove the "magic number" in this check
+       */
       continue;
     }
 
     const c = char.toUpperCase() in charDefs ? char.toUpperCase() : " ";
 
-    charDefs[c].forEach(point => {
+    charDefs[c].forEach((point: number) => {
       const { x, y } = gridPositionFromIndex({
         index: point,
         columns: dm.cellWidth_du,
@@ -162,21 +176,110 @@ function lex(document: string) {
   return text;
 }
 
-interface layoutPageArgs {
-  simpleText: ReturnType<typeof store.getState>["simpleText"];
+interface layoutPageByWordArgs {
+  simpleText: MainStoreState["simpleText"];
   dm: DisplayMetrics;
 }
 
-function layoutPage({ simpleText, dm }: layoutPageArgs) {
-  const displayList = [];
+function layoutPageByWord({
+  simpleText,
+  dm,
+}: layoutPageByWordArgs): SimpleLayoutObject[] {
+  const words = simpleText.split(" ");
+  const layoutList: SimpleLayoutObject[] = [];
   const xStep = dm.cellWidth_du + dm.gridSpaceX_du;
   const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
   const lastColumnXCoord = dm.getColumnXCoord_du(dm.displayColumns - 1);
+
   let cursorX_du = dm.drawAreaLeft_du;
   let cursorY_du = dm.drawAreaTop_du;
 
+  for (const word of words) {
+    // check if there is room in the line for the word
+    if (!dm.textFits(word, cursorX_du)) {
+      cursorX_du = dm.drawAreaLeft_du;
+      cursorY_du += yStep;
+    }
+
+    // if there is room, or the word will never fit on a single line:
+    // hand off layout of chars in word to our character by character layout function
+    const {
+      layoutList: partialDisplayList,
+      x: newX,
+      y: newY,
+    } = layoutPageByCharacter({
+      simpleText: word,
+      dm,
+      initialCursor: { x: cursorX_du, y: cursorY_du },
+    });
+    partialDisplayList.forEach(entry => layoutList.push(entry));
+
+    cursorX_du = newX;
+    cursorY_du = newY;
+
+    if (cursorX_du >= lastColumnXCoord) {
+      cursorX_du = dm.drawAreaLeft_du;
+      cursorY_du += yStep;
+    } else if (cursorX_du !== dm.drawAreaLeft_du) {
+      cursorX_du += xStep;
+    }
+    layoutList.push({ x: cursorX_du, y: cursorY_du, char: " " });
+  }
+  return layoutList;
+}
+
+interface layoutPageByCharacterArgs {
+  simpleText: MainStoreState["simpleText"];
+  dm: DisplayMetrics;
+}
+interface layoutPageByCharacterWithCursorArgs {
+  simpleText: MainStoreState["simpleText"];
+  dm: DisplayMetrics;
+  initialCursor: {
+    x: number;
+    y: number;
+  };
+}
+
+interface SimpleLayoutObject {
+  x: number;
+  y: number;
+  char: string;
+}
+
+interface DisplayListWithCursor {
+  layoutList: SimpleLayoutObject[];
+  x: number;
+  y: number;
+}
+
+function layoutPageByCharacter(
+  input: layoutPageByCharacterArgs
+): SimpleLayoutObject[];
+function layoutPageByCharacter(
+  input: layoutPageByCharacterWithCursorArgs
+): DisplayListWithCursor;
+
+/** A character-by-character layout function that returns a display list. If provided with an initial cursor object, the layout will begin there, and will return the layout list along with the updated cursor position */
+function layoutPageByCharacter(
+  input: layoutPageByCharacterArgs | layoutPageByCharacterWithCursorArgs
+): SimpleLayoutObject[] | DisplayListWithCursor {
+  const { dm, simpleText } = input;
+  const layoutList = [];
+  const xStep = dm.cellWidth_du + dm.gridSpaceX_du;
+  const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
+  const lastColumnXCoord = dm.getColumnXCoord_du(dm.displayColumns - 1);
+
+  let cursorX_du = dm.drawAreaLeft_du;
+  let cursorY_du = dm.drawAreaTop_du;
+
+  if ("initialCursor" in input) {
+    cursorX_du = input.initialCursor.x;
+    cursorY_du = input.initialCursor.y;
+  }
+
   for (const char of simpleText) {
-    displayList.push({ x: cursorX_du, y: cursorY_du, char });
+    layoutList.push({ x: cursorX_du, y: cursorY_du, char });
 
     if (char === "\n") {
       // jump to a new row on \n
@@ -198,7 +301,12 @@ function layoutPage({ simpleText, dm }: layoutPageArgs) {
       cursorX_du += xStep;
     }
   }
-  return displayList;
+
+  if ("initialCursor" in input) {
+    return { layoutList, x: cursorX_du, y: cursorY_du };
+  } else {
+    return layoutList;
+  }
 }
 
 function onWindowResize() {
@@ -274,7 +382,6 @@ function scrollDown() {
   store.setState(prev => {
     const { drawAreaTop_du } = prev.dm;
     const { scrollY_du, layoutList } = prev;
-
     const maxScroll = layoutList.at(-1).y - drawAreaTop_du;
 
     return {
@@ -283,7 +390,7 @@ function scrollDown() {
     };
   });
 }
-
+// TODO - add isScrolling to store
 let isScrolling = false;
 function scrollDownOneRow() {
   if (isScrolling) return;
