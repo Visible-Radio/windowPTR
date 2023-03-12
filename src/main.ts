@@ -1,50 +1,15 @@
 import configureCanvas from "./lib/configureCanvas";
-import customDefs from "./lib/customDefs_charWidth_7";
 import drawBorder from "./lib/drawBorder";
-import drawCellOutlines from "./lib/drawCellOutlines";
 import calculateDisplayMetrics, {
   canvasConfigOptionsDefault,
 } from "./lib/calculateDisplayMetrics";
-import { createSubscribableStore } from "./stateContainer/createSubscribableStore";
 import { useDrawingTools } from "./lib/makeDrawingTools";
 import { ptrEventEmitter } from "./pubsub/ptrEmitter";
-import { modifyDefs } from "./utils/modifyDefs";
-import { makeCanvas } from "./utils/makeCanvas";
 import { DisplayMetrics } from "./utils/typeUtils/configuredCanvas";
-import { gridPositionFromIndex } from "./utils/gridPositionFromIndex";
-import { rgbToString } from "./utils/rgbToString";
-
-const charDefs = modifyDefs(customDefs);
-const initRoot = document.getElementById("root") as HTMLDivElement;
-const initCtx = makeCanvas(initRoot).getContext("2d")!;
-const initText =
-  "The sky was the color of a television\n\n tuned to a dead channel";
-const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
-const intDrawingTools = useDrawingTools(initCtx);
-
-interface MainStoreState {
-  layoutList: SimpleLayoutObject[];
-  dm: DisplayMetrics;
-  charDefs: ReturnType<typeof modifyDefs>;
-  root: HTMLDivElement;
-  ctx: CanvasRenderingContext2D;
-  getTools: ReturnType<typeof useDrawingTools>;
-  simpleText: string;
-  scrollY_du: number;
-}
-
-const mainStoreTemplateState = {
-  dm: initDm,
-  charDefs,
-  root: initRoot,
-  ctx: initCtx,
-  getTools: intDrawingTools,
-  simpleText: initText,
-  scrollY_du: 0,
-  layoutList: [] as SimpleLayoutObject[],
-};
-
-const store = createSubscribableStore(mainStoreTemplateState);
+import { store } from "./lib/state/state";
+import { layoutByWord } from "./lib/layout/layoutByWord";
+import { scrollDownOneRow, scrollUpOneRow } from "./lib/actions/actions";
+import { drawScreen } from "./lib/draw/drawScreen";
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
   const { getTools, ctx, charDefs, root, simpleText } = data;
@@ -52,7 +17,7 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
   // drawCellOutlines(getTools, dm);
-  const layoutList = layoutPageByWord({ simpleText, dm });
+  const layoutList = layoutByWord({ simpleText, dm });
   drawScreen(layoutList);
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
@@ -80,7 +45,7 @@ store.subscribe(
 store.subscribe(
   ({ dm, simpleText }) => ({ dm, simpleText }),
   ({ dm, simpleText }) => {
-    store.setState({ layoutList: layoutPageByWord({ dm, simpleText }) });
+    store.setState({ layoutList: layoutByWord({ dm, simpleText }) });
   }
 );
 
@@ -97,49 +62,6 @@ store.subscribe(
     drawScreen(store.getState().layoutList);
   }
 );
-
-function drawScreen(layoutList: SimpleLayoutObject[]) {
-  const { getTools, charDefs, dm, scrollY_du } = store.getState();
-  const { ctx, fillRect_du, clearRect_du } = getTools(dm.scale);
-  ctx.fillStyle = rgbToString(dm.borderColor);
-  ctx.lineWidth = dm.scale;
-  clearRect_du(
-    dm.drawAreaLeft_du,
-    dm.drawAreaTop_du,
-    dm.drawAreaRight_du,
-    dm.drawAreaHeight_du
-  );
-
-  for (const { x: cursorX_du, y: cursorY_du, char } of layoutList) {
-    if (
-      cursorY_du > scrollY_du + dm.drawAreaHeight_du ||
-      cursorY_du + dm.cellHeight_du - 4 < scrollY_du
-    ) {
-      /*
-      TODO: Remove the "magic number" in this check
-       */
-      continue;
-    }
-
-    const c = char.toUpperCase() in charDefs ? char.toUpperCase() : " ";
-
-    charDefs[c].forEach((point: number) => {
-      const { x, y } = gridPositionFromIndex({
-        index: point,
-        columns: dm.cellWidth_du,
-      });
-      const adjustedX = x + cursorX_du;
-      const adjustedY = y + cursorY_du - scrollY_du;
-
-      if (
-        !(adjustedY >= dm.drawAreaBottom_du || adjustedY < dm.drawAreaTop_du)
-      ) {
-        // prevent drawing pixels in top and bottom gutters
-        fillRect_du(adjustedX, adjustedY, 1, 1);
-      }
-    });
-  }
-}
 
 interface syncDisplayWithMetricsArgs extends Record<string, unknown> {
   dm: DisplayMetrics;
@@ -176,139 +98,6 @@ function lex(document: string) {
   return text;
 }
 
-interface layoutPageByWordArgs {
-  simpleText: MainStoreState["simpleText"];
-  dm: DisplayMetrics;
-}
-
-function layoutPageByWord({
-  simpleText,
-  dm,
-}: layoutPageByWordArgs): SimpleLayoutObject[] {
-  const words = simpleText.split(" ");
-  const layoutList: SimpleLayoutObject[] = [];
-  const xStep = dm.cellWidth_du + dm.gridSpaceX_du;
-  const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
-  const lastColumnXCoord = dm.getColumnXCoord_du(dm.displayColumns - 1);
-
-  let cursorX_du = dm.drawAreaLeft_du;
-  let cursorY_du = dm.drawAreaTop_du;
-
-  for (const word of words) {
-    // check if there is room in the line for the word
-    if (!dm.textFits(word, cursorX_du)) {
-      cursorX_du = dm.drawAreaLeft_du;
-      cursorY_du += yStep;
-    }
-
-    // if there is room, or the word will never fit on a single line:
-    // hand off layout of chars in word to our character by character layout function
-    const {
-      layoutList: partialDisplayList,
-      x: newX,
-      y: newY,
-    } = layoutPageByCharacter({
-      simpleText: word,
-      dm,
-      initialCursor: { x: cursorX_du, y: cursorY_du },
-    });
-    partialDisplayList.forEach(entry => layoutList.push(entry));
-
-    cursorX_du = newX;
-    cursorY_du = newY;
-
-    if (cursorX_du >= lastColumnXCoord) {
-      cursorX_du = dm.drawAreaLeft_du;
-      cursorY_du += yStep;
-    } else if (cursorX_du !== dm.drawAreaLeft_du) {
-      cursorX_du += xStep;
-    }
-    layoutList.push({ x: cursorX_du, y: cursorY_du, char: " " });
-  }
-  return layoutList;
-}
-
-interface layoutPageByCharacterArgs {
-  simpleText: MainStoreState["simpleText"];
-  dm: DisplayMetrics;
-}
-interface layoutPageByCharacterWithCursorArgs {
-  simpleText: MainStoreState["simpleText"];
-  dm: DisplayMetrics;
-  initialCursor: {
-    x: number;
-    y: number;
-  };
-}
-
-interface SimpleLayoutObject {
-  x: number;
-  y: number;
-  char: string;
-}
-
-interface DisplayListWithCursor {
-  layoutList: SimpleLayoutObject[];
-  x: number;
-  y: number;
-}
-
-function layoutPageByCharacter(
-  input: layoutPageByCharacterArgs
-): SimpleLayoutObject[];
-function layoutPageByCharacter(
-  input: layoutPageByCharacterWithCursorArgs
-): DisplayListWithCursor;
-
-/** A character-by-character layout function that returns a display list. If provided with an initial cursor object, the layout will begin there, and will return the layout list along with the updated cursor position */
-function layoutPageByCharacter(
-  input: layoutPageByCharacterArgs | layoutPageByCharacterWithCursorArgs
-): SimpleLayoutObject[] | DisplayListWithCursor {
-  const { dm, simpleText } = input;
-  const layoutList = [];
-  const xStep = dm.cellWidth_du + dm.gridSpaceX_du;
-  const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
-  const lastColumnXCoord = dm.getColumnXCoord_du(dm.displayColumns - 1);
-
-  let cursorX_du = dm.drawAreaLeft_du;
-  let cursorY_du = dm.drawAreaTop_du;
-
-  if ("initialCursor" in input) {
-    cursorX_du = input.initialCursor.x;
-    cursorY_du = input.initialCursor.y;
-  }
-
-  for (const char of simpleText) {
-    layoutList.push({ x: cursorX_du, y: cursorY_du, char });
-
-    if (char === "\n") {
-      // jump to a new row on \n
-      // this is quick and dirty. We may actually want newlines in the layoutList
-      cursorX_du = dm.drawAreaLeft_du;
-      cursorY_du += yStep;
-      continue;
-    }
-
-    if (cursorX_du === dm.getColumnXCoord_du(0) && char === " ") {
-      // omit spaces at the start of a row
-      continue;
-    }
-
-    if (cursorX_du >= lastColumnXCoord) {
-      cursorX_du = dm.drawAreaLeft_du;
-      cursorY_du += yStep;
-    } else {
-      cursorX_du += xStep;
-    }
-  }
-
-  if ("initialCursor" in input) {
-    return { layoutList, x: cursorX_du, y: cursorY_du };
-  } else {
-    return layoutList;
-  }
-}
-
 function onWindowResize() {
   const newDm = calculateDisplayMetrics(
     store.getState().dm.cellWidth_du,
@@ -323,128 +112,3 @@ function onWindowResize() {
     store.setState(prev => ({ ...prev, dm: newDm }));
   }
 }
-
-function setScale(userScale: number) {
-  if (userScale < 1) throw new Error("cannot set scale less than 1");
-  if (userScale > 10) throw new Error("cannot set scale greater than 10");
-  store.setState(prev => ({
-    ...prev,
-    dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
-      ...canvasConfigOptionsDefault,
-      scale: userScale,
-      displayRows: prev.dm.displayRows,
-      gridSpaceX_du: prev.dm.gridSpaceX_du,
-      gridSpaceY_du: prev.dm.gridSpaceY_du,
-    }),
-  }));
-}
-
-function setRows(userDisplayRows: number) {
-  if (userDisplayRows < 1)
-    throw new Error("cannot set display rows less than 1");
-  if (userDisplayRows > 40)
-    throw new Error("cannot set display rows greater than 40");
-  store.setState(prev => ({
-    ...prev,
-    dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
-      ...canvasConfigOptionsDefault,
-      scale: prev.dm.scale,
-      displayRows: userDisplayRows,
-      gridSpaceX_du: prev.dm.gridSpaceX_du,
-      gridSpaceY_du: prev.dm.gridSpaceY_du,
-    }),
-  }));
-}
-
-function setGridSpace(userGridSpace: number) {
-  if (userGridSpace < 0) throw new Error("cannot set negative gridSpace");
-  if (userGridSpace > 5) throw new Error("cannot set gridSpace greater than 5");
-  store.setState(prev => ({
-    ...prev,
-    dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
-      ...canvasConfigOptionsDefault,
-      scale: prev.dm.scale,
-      displayRows: prev.dm.displayRows,
-      gridSpaceX_du: userGridSpace,
-      gridSpaceY_du: userGridSpace,
-    }),
-  }));
-}
-
-function setScroll(scrollValue: number) {
-  store.setState(prev => ({
-    ...prev,
-    scrollY_du: scrollValue,
-  }));
-}
-
-function scrollDown() {
-  store.setState(prev => {
-    const { drawAreaTop_du } = prev.dm;
-    const { scrollY_du, layoutList } = prev;
-    const maxScroll = layoutList.at(-1).y - drawAreaTop_du;
-
-    return {
-      ...prev,
-      scrollY_du: scrollY_du >= maxScroll ? scrollY_du : scrollY_du + 1,
-    };
-  });
-}
-// TODO - add isScrolling to store
-let isScrolling = false;
-function scrollDownOneRow() {
-  if (isScrolling) return;
-  const { layoutList, scrollY_du, dm } = store.getState();
-  const step = dm.cellHeight_du + dm.gridSpaceY_du;
-  const targetScroll = Math.min(
-    scrollY_du + step,
-    layoutList.at(-1).y - dm.drawAreaTop_du
-  );
-  const timerId = setInterval(() => {
-    if (targetScroll > store.getState().scrollY_du) {
-      isScrolling = true;
-      scrollDown();
-    } else {
-      isScrolling = false;
-      clearInterval(timerId);
-    }
-  }, 15);
-}
-
-function scrollUpOneRow() {
-  if (isScrolling) return;
-  const { scrollY_du, dm } = store.getState();
-  const step = dm.cellHeight_du + dm.gridSpaceY_du;
-
-  const targetScroll = Math.max(0, scrollY_du - step);
-  const timerId = setInterval(() => {
-    if (targetScroll < store.getState().scrollY_du) {
-      isScrolling = true;
-      scrollUp();
-    } else {
-      isScrolling = false;
-      clearInterval(timerId);
-    }
-  }, 15);
-}
-
-function scrollUp() {
-  store.setState(prev => ({
-    ...prev,
-    scrollY_du: prev.scrollY_du > 0 ? prev.scrollY_du - 1 : prev.scrollY_du,
-  }));
-}
-
-const PTR = {
-  setScale,
-  setRows,
-  setGridSpace,
-  setScroll,
-  scrollDown,
-  scrollUp,
-  setSimpleText(text: string) {
-    store.setState(prev => ({ ...prev, simpleText: text }));
-  },
-};
-
-window._PTR = PTR;
