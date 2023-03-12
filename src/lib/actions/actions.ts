@@ -57,7 +57,7 @@ export function setScroll(scrollValue: number) {
   }));
 }
 
-export function scrollDown() {
+export function scrollDown(increment = 1) {
   store.setState(prev => {
     const { drawAreaTop_du } = prev.dm;
     const { scrollY_du, layoutList } = prev;
@@ -65,53 +65,87 @@ export function scrollDown() {
 
     return {
       ...prev,
-      scrollY_du: scrollY_du >= maxScroll ? scrollY_du : scrollY_du + 1,
+      scrollY_du: scrollY_du >= maxScroll ? scrollY_du : scrollY_du + increment,
     };
   });
 }
-// TODO - add isScrolling to store
-let isScrolling = false;
-export function scrollDownOneRow() {
-  if (isScrolling) return;
+
+export function scrollUp(decrement = 1) {
+  store.setState(prev => ({
+    ...prev,
+    scrollY_du:
+      prev.scrollY_du - decrement >= 0
+        ? prev.scrollY_du - decrement
+        : prev.scrollY_du,
+  }));
+}
+
+export function animatedScrollDown(increment = 1) {
   const { layoutList, scrollY_du, dm } = store.getState();
+
   const step = dm.cellHeight_du + dm.gridSpaceY_du;
   const targetScroll = Math.min(
     scrollY_du + step,
     layoutList.at(-1).y - dm.drawAreaTop_du
   );
-  const timerId = setInterval(() => {
-    if (targetScroll > store.getState().scrollY_du) {
-      isScrolling = true;
-      scrollDown();
-    } else {
-      isScrolling = false;
-      clearInterval(timerId);
+
+  function scrollDownAnimation() {
+    if (store.getState().scrollY_du >= targetScroll) {
+      return;
     }
-  }, 15);
+    scrollDown(increment);
+    requestAnimationFrame(scrollDownAnimation);
+  }
+
+  requestAnimationFrame(scrollDownAnimation);
 }
 
-export function scrollUpOneRow() {
-  if (isScrolling) return;
+export function animatedScrollUp(decrement = 1) {
   const { scrollY_du, dm } = store.getState();
+
   const step = dm.cellHeight_du + dm.gridSpaceY_du;
 
   const targetScroll = Math.max(0, scrollY_du - step);
-  const timerId = setInterval(() => {
-    if (targetScroll < store.getState().scrollY_du) {
-      isScrolling = true;
-      scrollUp();
-    } else {
-      isScrolling = false;
-      clearInterval(timerId);
+
+  function scrollUpAnimation() {
+    if (store.getState().scrollY_du <= targetScroll) {
+      return;
     }
-  }, 15);
+    scrollUp(decrement);
+    requestAnimationFrame(scrollUpAnimation);
+  }
+
+  requestAnimationFrame(scrollUpAnimation);
 }
 
-export function scrollUp() {
-  store.setState(prev => ({
-    ...prev,
-    scrollY_du: prev.scrollY_du > 0 ? prev.scrollY_du - 1 : prev.scrollY_du,
-  }));
+/** like the css timing function. t input is 0 - 1, representing the progress of the animation. Thanks chatGPT */
+function easeInOut(t: number) {
+  return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+}
+
+/** currently handles cases where the current position is less than the requested position */
+export function animatedScrollTo(yCoord_du: number) {
+  const startingPosition = store.getState().scrollY_du;
+  let iteration = 0;
+  function frame() {
+    if (store.getState().scrollY_du >= yCoord_du) {
+      store.setState({
+        scrollY_du: yCoord_du,
+      });
+      return;
+    }
+    const progress = iteration / 60;
+    const newPosition = Math.min(
+      startingPosition + Math.floor(easeInOut(progress) * yCoord_du),
+      yCoord_du
+    );
+    store.setState({
+      scrollY_du: newPosition,
+    });
+    iteration += 1;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }
 
 const PTR = {

@@ -1,3 +1,4 @@
+import { neuromancerText } from "../../sampleText/neuromancer";
 import { createSubscribableStore } from "../../stateContainer/createSubscribableStore";
 import { makeCanvas } from "../../utils/makeCanvas";
 import { modifyDefs } from "../../utils/modifyDefs";
@@ -10,7 +11,7 @@ import { useDrawingTools } from "../makeDrawingTools";
 const charDefs = modifyDefs(customDefs_charWidth_7);
 const initRoot = document.getElementById("root") as HTMLDivElement;
 const initCtx = makeCanvas(initRoot).getContext("2d")!;
-const initText = "The sky was the color of television tuned to a dead channel";
+const initText = neuromancerText;
 const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
 const intDrawingTools = useDrawingTools(initCtx);
 
@@ -23,6 +24,7 @@ export interface MainStoreState {
   getTools: ReturnType<typeof useDrawingTools>;
   simpleText: string;
   scrollY_du: number;
+  isScrolling: boolean;
 }
 
 const mainStoreTemplateState = {
@@ -34,6 +36,7 @@ const mainStoreTemplateState = {
   simpleText: initText,
   scrollY_du: 0,
   layoutList: [] as SimpleLayoutObject[],
+  isScrolling: false,
 };
 
 export const store = createSubscribableStore(mainStoreTemplateState);

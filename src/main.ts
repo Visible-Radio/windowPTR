@@ -8,7 +8,11 @@ import { ptrEventEmitter } from "./pubsub/ptrEmitter";
 import { DisplayMetrics } from "./utils/typeUtils/configuredCanvas";
 import { store } from "./lib/state/state";
 import { layoutByWord } from "./lib/layout/layoutByWord";
-import { scrollDownOneRow, scrollUpOneRow } from "./lib/actions/actions";
+import {
+  animatedScrollDown,
+  animatedScrollTo,
+  animatedScrollUp,
+} from "./lib/actions/actions";
 import { drawScreen } from "./lib/draw/drawScreen";
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
@@ -22,11 +26,11 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") {
-      // scrollDown();
-      scrollDownOneRow();
+      animatedScrollDown(1);
     } else if (e.key === "ArrowUp") {
-      // scrollUp();
-      scrollUpOneRow();
+      animatedScrollUp(1);
+    } else if (e.key === "ArrowRight") {
+      animatedScrollTo(1500);
     }
   });
 
