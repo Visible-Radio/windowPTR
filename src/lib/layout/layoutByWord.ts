@@ -16,14 +16,14 @@ export function layoutByWord({
   const layoutList: SimpleLayoutObject[] = [];
   const xStep = dm.cellWidth_du + dm.gridSpaceX_du;
   const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
-  const lastColumnXCoord = dm.getColumnXCoord_du(dm.displayColumns - 1);
 
   let cursorX_du = dm.drawAreaLeft_du;
   let cursorY_du = dm.drawAreaTop_du;
 
   for (const word of words) {
     // check if there is room in the line for the word
-    if (!dm.textFits(word, cursorX_du)) {
+
+    if (!dm.textFits(word, cursorX_du) && cursorX_du !== dm.drawAreaLeft_du) {
       cursorX_du = dm.drawAreaLeft_du;
       cursorY_du += yStep;
     }
@@ -44,10 +44,7 @@ export function layoutByWord({
     cursorX_du = newX;
     cursorY_du = newY;
 
-    if (cursorX_du >= lastColumnXCoord) {
-      cursorX_du = dm.drawAreaLeft_du;
-      cursorY_du += yStep;
-    } else if (cursorX_du !== dm.drawAreaLeft_du) {
+    if (cursorX_du !== dm.drawAreaLeft_du) {
       cursorX_du += xStep;
     }
     layoutList.push({ x: cursorX_du, y: cursorY_du, char: " " });
