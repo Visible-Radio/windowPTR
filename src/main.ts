@@ -12,6 +12,10 @@ import {
   animatedScrollDown,
   animatedScrollTo,
   animatedScrollUp,
+  end,
+  home,
+  pageDown,
+  pageUp,
 } from "./lib/actions/actions";
 import { drawScreen } from "./lib/draw/drawScreen";
 
@@ -26,11 +30,17 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") {
-      animatedScrollDown(1);
+      // animatedScrollDown(1);
+      end();
     } else if (e.key === "ArrowUp") {
-      animatedScrollUp(1);
+      // animatedScrollUp(1);
+      home();
     } else if (e.key === "ArrowRight") {
-      animatedScrollTo(1500);
+      pageDown();
+      // animatedScrollTo(1500);
+    } else if (e.key === "ArrowLeft") {
+      // animatedScrollTo(0);
+      pageUp();
     }
   });
 

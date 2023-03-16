@@ -120,32 +120,92 @@ export function animatedScrollUp(decrement = 1) {
 
 /** like the css timing function. t input is 0 - 1, representing the progress of the animation. Thanks chatGPT */
 function easeInOut(t: number) {
-  return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+  const ret = t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+  // console.log("ease fn called", t, ret);
+  return ret;
 }
 
 /** currently handles cases where the current position is less than the requested position */
-export function animatedScrollTo(yCoord_du: number) {
+export function animatedScrollTo(destinationPosition: number) {
   const startingPosition = store.getState().scrollY_du;
-  let iteration = 0;
+  const direction = startingPosition < destinationPosition ? "down" : "up";
+  let iterations = 0;
+
+  store.setState({ isScrolling: true });
+
   function frame() {
-    if (store.getState().scrollY_du >= yCoord_du) {
-      store.setState({
-        scrollY_du: yCoord_du,
-      });
-      return;
+    console.log("called");
+    const progressFactor = easeInOut(iterations / 60);
+    if (direction === "down") {
+      const newPosition =
+        startingPosition +
+        progressFactor * (destinationPosition - startingPosition);
+
+      if (newPosition >= destinationPosition) {
+        store.setState({
+          scrollY_du: destinationPosition,
+          isScrolling: false,
+        });
+        return;
+      } else {
+        store.setState({
+          scrollY_du: newPosition,
+        });
+      }
+    } else if (direction === "up") {
+      const newPosition =
+        startingPosition -
+        progressFactor * (startingPosition - destinationPosition);
+
+      if (newPosition <= destinationPosition) {
+        store.setState({
+          scrollY_du: destinationPosition,
+          isScrolling: false,
+        });
+        return;
+      } else {
+        store.setState({
+          scrollY_du: newPosition,
+        });
+      }
     }
-    const progress = iteration / 60;
-    const newPosition = Math.min(
-      startingPosition + Math.floor(easeInOut(progress) * yCoord_du),
-      yCoord_du
-    );
-    store.setState({
-      scrollY_du: newPosition,
-    });
-    iteration += 1;
+    iterations++;
     requestAnimationFrame(frame);
   }
+
   requestAnimationFrame(frame);
+}
+
+export function pageDown() {
+  const { dm, scrollY_du, isScrolling } = store.getState();
+  const { displayRows, gridSpaceY_du, cellHeight_du } = dm;
+  const lastRow = scrollY_du + displayRows * (gridSpaceY_du + cellHeight_du);
+  if (isScrolling) return;
+  animatedScrollTo(lastRow);
+}
+
+export function pageUp() {
+  const { dm, scrollY_du, isScrolling } = store.getState();
+  const { displayRows, gridSpaceY_du, cellHeight_du } = dm;
+  const firstRow = scrollY_du - displayRows * (gridSpaceY_du + cellHeight_du);
+  if (firstRow < 0 || isScrolling) return;
+  animatedScrollTo(firstRow);
+}
+
+export function home() {
+  // scroll all the way up
+  const { isScrolling } = store.getState();
+  if (isScrolling) return;
+  animatedScrollTo(0);
+}
+
+export function end() {
+  // scroll all the way down
+  const { dm, isScrolling, layoutList } = store.getState();
+  const { borderGutter_du, borderWidth_du, cellHeight_du } = dm;
+  const end = layoutList.at(-1).y - borderGutter_du - borderWidth_du;
+  if (isScrolling) return;
+  animatedScrollTo(end);
 }
 
 const PTR = {

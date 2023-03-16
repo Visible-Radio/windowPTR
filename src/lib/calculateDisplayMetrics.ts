@@ -2,10 +2,10 @@ import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
 import { rgb8Bit } from "../utils/typeUtils/intRange";
 
 export const canvasConfigOptionsDefault = {
-  scale: 5,
+  scale: 4,
   displayRows: 10,
   gridSpaceX_du: -1, // measured in DUs
-  gridSpaceY_du: 3, // measured in DUs
+  gridSpaceY_du: 1, // measured in DUs
   borderColor: [200, 0, 120] as rgb8Bit,
 };
 
