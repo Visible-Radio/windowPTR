@@ -2,6 +2,7 @@ import { gridPositionFromIndex } from "../../utils/gridPositionFromIndex";
 import { rgbToString } from "../../utils/rgbToString";
 import { SimpleLayoutObject } from "../layout/layoutByCharacter";
 import { store } from "../state/state";
+import { invertChar } from "./invertChar";
 
 export function drawScreen(layoutList: SimpleLayoutObject[]) {
   const { getTools, charDefs, dm, scrollY_du } = store.getState();
@@ -15,7 +16,7 @@ export function drawScreen(layoutList: SimpleLayoutObject[]) {
     dm.drawAreaHeight_du
   );
 
-  for (const { x: cursorX_du, y: cursorY_du, char } of layoutList) {
+  for (const { x: cursorX_du, y: cursorY_du, char, flags } of layoutList) {
     if (
       cursorY_du > scrollY_du + dm.drawAreaBottom_du ||
       cursorY_du + dm.cellHeight_du < scrollY_du
@@ -25,7 +26,11 @@ export function drawScreen(layoutList: SimpleLayoutObject[]) {
 
     const c = char.toUpperCase() in charDefs ? char.toUpperCase() : " ";
 
-    charDefs[c].forEach((point: number) => {
+    const current = flags.hl
+      ? invertChar(charDefs[c], charDefs.charWidth)
+      : charDefs[c];
+
+    current.forEach((point: number) => {
       const { x, y } = gridPositionFromIndex({
         index: point,
         columns: dm.cellWidth_du,
