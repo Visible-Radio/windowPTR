@@ -7,7 +7,7 @@ export function drawScreen(layoutList: SimpleLayoutObject[]) {
   const { getTools, charDefs, dm, scrollY_du } = store.getState();
   const { ctx, fillRect_du, clearRect_du } = getTools(dm.scale);
   ctx.fillStyle = rgbToString(dm.borderColor);
-  ctx.lineWidth = dm.scale;
+
   clearRect_du(
     dm.drawAreaLeft_du,
     dm.drawAreaTop_du,
@@ -17,12 +17,9 @@ export function drawScreen(layoutList: SimpleLayoutObject[]) {
 
   for (const { x: cursorX_du, y: cursorY_du, char } of layoutList) {
     if (
-      cursorY_du > scrollY_du + dm.drawAreaHeight_du ||
-      cursorY_du + dm.cellHeight_du - 4 < scrollY_du
+      cursorY_du > scrollY_du + dm.drawAreaBottom_du ||
+      cursorY_du + dm.cellHeight_du < scrollY_du
     ) {
-      /*
-      TODO: Remove the "magic number" in this check
-       */
       continue;
     }
 
@@ -37,7 +34,7 @@ export function drawScreen(layoutList: SimpleLayoutObject[]) {
       const adjustedY = y + cursorY_du - scrollY_du;
 
       if (
-        !(adjustedY >= dm.drawAreaBottom_du || adjustedY < dm.drawAreaTop_du)
+        !(dm.drawAreaBottom_du - 1 < adjustedY || adjustedY < dm.drawAreaTop_du)
       ) {
         // prevent drawing pixels in top and bottom gutters
         fillRect_du(adjustedX, adjustedY, 1, 1);
