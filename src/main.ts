@@ -8,15 +8,7 @@ import { ptrEventEmitter } from "./pubsub/ptrEmitter";
 import { DisplayMetrics } from "./utils/typeUtils/configuredCanvas";
 import { store } from "./lib/state/state";
 import { layoutByWord } from "./lib/layout/layoutByWord";
-import {
-  animatedScrollDown,
-  animatedScrollTo,
-  animatedScrollUp,
-  end,
-  home,
-  pageDown,
-  pageUp,
-} from "./lib/actions/actions";
+import { end, home, pageDown, pageUp } from "./lib/actions/actions";
 import { drawScreen } from "./lib/draw/drawScreen";
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
@@ -24,22 +16,17 @@ ptrEventEmitter.subscribe("init", ({ data }) => {
   const dm = calculateDisplayMetrics(charDefs.charWidth, root);
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
-  // drawCellOutlines(getTools, dm);
-  const layoutList = layoutByWord({ simpleText, dm });
+  const layoutList = layoutByWord({ simpleText: lex(simpleText), dm });
   drawScreen(layoutList);
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") {
-      // animatedScrollDown(1);
       end();
     } else if (e.key === "ArrowUp") {
-      // animatedScrollUp(1);
       home();
     } else if (e.key === "ArrowRight") {
       pageDown();
-      // animatedScrollTo(1500);
     } else if (e.key === "ArrowLeft") {
-      // animatedScrollTo(0);
       pageUp();
     }
   });
@@ -59,7 +46,9 @@ store.subscribe(
 store.subscribe(
   ({ dm, simpleText }) => ({ dm, simpleText }),
   ({ dm, simpleText }) => {
-    store.setState({ layoutList: layoutByWord({ dm, simpleText }) });
+    store.setState({
+      layoutList: layoutByWord({ dm, simpleText: lex(simpleText) }),
+    });
   }
 );
 
@@ -92,7 +81,6 @@ function syncDisplayWithMetrics({
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
   drawScreen(store.getState().layoutList);
-  // drawCellOutlines(getTools, dm);
 }
 
 function lex(document: string) {
