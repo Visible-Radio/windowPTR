@@ -2,11 +2,13 @@ import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
 import { rgb8Bit } from "../utils/typeUtils/intRange";
 
 export const canvasConfigOptionsDefault = {
-  scale: 4,
-  displayRows: 10,
+  scale: 2,
+  displayRows: 16,
   gridSpaceX_du: -1, // measured in DUs
-  gridSpaceY_du: 1, // measured in DUs
+  gridSpaceY_du: 3, // measured in DUs
   borderColor: [200, 0, 120] as rgb8Bit,
+  borderWidth_du: 0,
+  borderGutter_du: 3,
 };
 
 /**
@@ -20,11 +22,16 @@ export default function calculateDisplayMetrics(
   root: HTMLDivElement,
   options = canvasConfigOptionsDefault
 ): DisplayMetrics {
-  const { scale, displayRows, gridSpaceX_du, gridSpaceY_du, borderColor } =
-    options;
+  const {
+    scale,
+    displayRows,
+    gridSpaceX_du,
+    gridSpaceY_du,
+    borderColor,
+    borderWidth_du,
+    borderGutter_du,
+  } = options;
 
-  const borderWidth_du = 1;
-  const borderGutter_du = 1;
   const totalBorderWidth_du = borderWidth_du * 2 + borderGutter_du * 2;
   const remainingWidthXPx = root.clientWidth - totalBorderWidth_du * scale;
 

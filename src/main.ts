@@ -7,16 +7,19 @@ import { useDrawingTools } from "./lib/makeDrawingTools";
 import { ptrEventEmitter } from "./pubsub/ptrEmitter";
 import { DisplayMetrics } from "./utils/typeUtils/configuredCanvas";
 import { store } from "./lib/state/state";
-import { layoutByWord } from "./lib/layout/layoutByWord";
+
 import { end, home, pageDown, pageUp } from "./lib/actions/actions";
 import { drawScreen } from "./lib/draw/drawScreen";
+import { lex } from "./lib/lex/lex";
+import { layoutByToken } from "./lib/layout/layoutByToken";
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
   const { getTools, ctx, charDefs, root, simpleText } = data;
   const dm = calculateDisplayMetrics(charDefs.charWidth, root);
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
-  const layoutList = layoutByWord({ simpleText: lex(simpleText), dm });
+  const lexed = lex(simpleText);
+  const layoutList = layoutByToken({ tokens: lexed, dm });
   drawScreen(layoutList);
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
@@ -46,8 +49,10 @@ store.subscribe(
 store.subscribe(
   ({ dm, simpleText }) => ({ dm, simpleText }),
   ({ dm, simpleText }) => {
+    const lexed = lex(simpleText);
+
     store.setState({
-      layoutList: layoutByWord({ dm, simpleText: lex(simpleText) }),
+      layoutList: layoutByToken({ dm, tokens: lexed }),
     });
   }
 );
@@ -81,23 +86,6 @@ function syncDisplayWithMetrics({
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
   drawScreen(store.getState().layoutList);
-}
-
-function lex(document: string) {
-  /** string being built */
-  let text = "";
-  /** whether or not the current character is between a pair of angle brackets  */
-  let inAngle = false;
-  for (const char of document) {
-    if (char === "<") {
-      inAngle = true;
-    } else if (char === ">") {
-      inAngle = false;
-    } else if (!inAngle) {
-      text += char;
-    }
-  }
-  return text;
 }
 
 function onWindowResize() {
