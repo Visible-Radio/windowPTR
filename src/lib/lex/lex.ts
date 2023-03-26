@@ -10,13 +10,18 @@ export class Text {
 }
 
 export class Tag {
-  protected __tag: string;
-  constructor(tag: string) {
-    this.__tag = tag;
+  protected __tagName: string;
+  protected __attributes: Record<string, string>[];
+  constructor(tagName: string, attributes: Record<string, string>[]) {
+    this.__tagName = tagName;
+    this.__attributes = attributes;
   }
 
   get tag() {
-    return this.__tag;
+    return this.__tagName;
+  }
+  get attributes() {
+    return this.__attributes;
   }
 }
 
@@ -27,7 +32,6 @@ export function lex(document: string) {
   /** whether or not the current character is between a pair of angle brackets  */
   let inTag = false;
   for (const char of document) {
-    if (char === "\n") console.log("newline");
     if (char === "<") {
       inTag = true;
       if (text) {
@@ -36,7 +40,9 @@ export function lex(document: string) {
       }
     } else if (char === ">") {
       inTag = false;
-      out.push(new Tag(text));
+      const [tagName, attributes] = parseTag(text);
+      console.log(tagName, attributes);
+      out.push(new Tag(tagName, attributes));
       text = "";
     } else {
       text += char;
@@ -46,4 +52,30 @@ export function lex(document: string) {
     out.push(new Text(text));
   }
   return out;
+}
+
+type TagNames = "span";
+type TagAttributes = "highlight" | "color";
+
+/** take the content between < and /> and split it into the tag name, and any attributes */
+function parseTag(text: string) {
+  const [tagName, ...mabyeAttributes] = text.split(" ");
+  const attributes = mabyeAttributes.map(maybe => {
+    // should do some validation that we're not passing junk
+    const [attributeName, attributeValue] = maybe.split("=");
+    return [attributeName, coerceBooleans(attributeValue)];
+  });
+  return [tagName, Object.fromEntries(attributes)];
+}
+
+/** Catches strings representing booleans and converts them - otherwise returns the string */
+function coerceBooleans(string: string) {
+  switch (string) {
+    case "true":
+      return true;
+    case "false":
+      return false;
+    default:
+      return string;
+  }
 }

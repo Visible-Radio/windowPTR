@@ -50,8 +50,9 @@ store.subscribe(
   ({ dm, simpleText }) => ({ dm, simpleText }),
   ({ dm, simpleText }) => {
     const lexed = lex(simpleText);
+
     store.setState({
-      layoutList: layoutByToken({ dm, simpleText: lexed }),
+      layoutList: layoutByToken({ dm, tokens: lexed }),
     });
   }
 );

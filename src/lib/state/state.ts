@@ -33,7 +33,7 @@ const mainStoreTemplateState = {
   root: initRoot,
   ctx: initCtx,
   getTools: intDrawingTools,
-  simpleText: initText.slice(0, 240),
+  simpleText: initText,
   scrollY_du: 0,
   layoutList: [] as SimpleLayoutObject[],
   isScrolling: false,

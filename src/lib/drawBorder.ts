@@ -14,6 +14,7 @@ export default function drawBorder(
     displayHeight_du,
     displayWidth_du,
   } = dm;
+  if (borderWidth_du < 1) return;
   const { strokeRect_du, ctx } = getTools(scale);
 
   ctx.strokeStyle = rgbToString(borderColor);

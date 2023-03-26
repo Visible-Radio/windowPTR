@@ -14,11 +14,10 @@ export function layoutByToken({ tokens, dm }: layoutByTokenArgs) {
   const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
   let cursorX_du = dm.drawAreaLeft_du;
   let cursorY_du = dm.drawAreaTop_du;
-  const tokenFlags = { hl: false };
+  const tokenAttributes = { highlight: false, color: null };
 
   for (const token of tokens) {
-    setTokenFlags(token, tokenFlags);
-
+    setTokenAttributes(token, tokenAttributes);
     if (token instanceof Text) {
       const words = token.text.split(" ");
       for (const [i, word] of words.entries()) {
@@ -43,8 +42,9 @@ export function layoutByToken({ tokens, dm }: layoutByTokenArgs) {
           dm,
           initialCursor: { x: cursorX_du, y: cursorY_du },
         });
+
         partialDisplayList.forEach(entry =>
-          layoutList.push({ ...entry, flags: { ...tokenFlags } })
+          layoutList.push({ ...entry, attributes: { ...tokenAttributes } })
         );
 
         cursorX_du = newX;
@@ -56,7 +56,7 @@ export function layoutByToken({ tokens, dm }: layoutByTokenArgs) {
             x: cursorX_du,
             y: cursorY_du,
             char: " ",
-            flags: i === words.length - 1 ? {} : { ...tokenFlags },
+            attributes: i === words.length - 1 ? {} : { ...tokenAttributes },
           });
           cursorX_du += xStep;
         }
@@ -66,24 +66,25 @@ export function layoutByToken({ tokens, dm }: layoutByTokenArgs) {
   return layoutList;
 }
 
-interface TokenFlags {
-  hl: boolean;
+interface TokenAttributes {
+  highlight: boolean;
+  color: `rgb(${number},${number},${number})` | null;
 }
 
-/** Mutates token flags object based on the given Tag token. */
-function setTokenFlags(token: Tag | Text, tokenFlags: TokenFlags) {
-  if (!(token instanceof Tag)) return tokenFlags;
+function setTokenAttributes(
+  token: Tag | Text,
+  tokenAttributes: TokenAttributes
+) {
+  if (!(token instanceof Tag)) return tokenAttributes;
 
-  switch (token.tag) {
-    case "hl":
-      tokenFlags.hl = true;
-      return;
-
-    case "/hl":
-      tokenFlags.hl = false;
-      return;
-
-    default:
-      return;
+  if (token.tag === "span") {
+    const { attributes } = token;
+    tokenAttributes.color = attributes?.color ?? null;
+    tokenAttributes.highlight = attributes?.highlight ?? false;
+    return;
+  } else if (token.tag === "/span") {
+    tokenAttributes.color = null;
+    tokenAttributes.highlight = false;
+    return;
   }
 }
