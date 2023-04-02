@@ -15,11 +15,9 @@ export function modifyDefs(defs: typeof customDefs_charWidth_7) {
           key,
           value.map(pointIndex => {
             // for each row in the new grid, add 1 to the point Indexes in that row
-            return (pointIndex +=
-              2 * Math.floor(pointIndex / defs.charWidth) +
-              1 +
-              defs.charWidth +
-              2);
+            const row = Math.floor(pointIndex / defs.charWidth);
+            const offset = 2 * row + 1 + defs.charWidth + 2;
+            return (pointIndex += offset);
           }),
         ];
       }

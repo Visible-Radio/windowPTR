@@ -7,7 +7,6 @@ import { useDrawingTools } from "./lib/makeDrawingTools";
 import { ptrEventEmitter } from "./pubsub/ptrEmitter";
 import { DisplayMetrics } from "./utils/typeUtils/configuredCanvas";
 import { store } from "./lib/state/state";
-
 import { end, home, pageDown, pageUp } from "./lib/actions/actions";
 import { drawScreen } from "./lib/draw/drawScreen";
 import { lex } from "./lib/lex/lex";
