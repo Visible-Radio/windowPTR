@@ -69,22 +69,24 @@ export function layoutByToken({ tokens, dm }: layoutByTokenArgs) {
 interface TokenAttributes {
   highlight: boolean;
   color: `rgb(${number},${number},${number})` | null;
+  outline: boolean;
 }
 
 function setTokenAttributes(
   token: Tag | Text,
   tokenAttributes: TokenAttributes
 ) {
-  if (!(token instanceof Tag)) return tokenAttributes;
+  if (!(token instanceof Tag)) return;
 
   if (token.tag === "span") {
     const { attributes } = token;
     tokenAttributes.color = attributes?.color ?? null;
     tokenAttributes.highlight = attributes?.highlight ?? false;
-    return;
+    tokenAttributes.outline = attributes?.outline ?? false;
   } else if (token.tag === "/span") {
     tokenAttributes.color = null;
     tokenAttributes.highlight = false;
-    return;
+    tokenAttributes.outline = false;
   }
+  return;
 }

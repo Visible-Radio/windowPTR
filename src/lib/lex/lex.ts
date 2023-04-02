@@ -1,3 +1,10 @@
+// may need to move this to prevent import cycles
+export type AttributeMap = {
+  highlight: boolean;
+  color: `rgb(${number},${number},${number})` | null;
+  outline: boolean;
+};
+
 export class Text {
   protected __text: string;
   constructor(text: string) {
@@ -11,8 +18,8 @@ export class Text {
 
 export class Tag {
   protected __tagName: string;
-  protected __attributes: Record<string, string>[];
-  constructor(tagName: string, attributes: Record<string, string>[]) {
+  protected __attributes: Partial<AttributeMap>;
+  constructor(tagName: string, attributes: Partial<AttributeMap>) {
     this.__tagName = tagName;
     this.__attributes = attributes;
   }
@@ -41,7 +48,6 @@ export function lex(document: string) {
     } else if (char === ">") {
       inTag = false;
       const [tagName, attributes] = parseTag(text);
-      console.log(tagName, attributes);
       out.push(new Tag(tagName, attributes));
       text = "";
     } else {
@@ -53,9 +59,6 @@ export function lex(document: string) {
   }
   return out;
 }
-
-type TagNames = "span";
-type TagAttributes = "highlight" | "color";
 
 /** take the content between < and /> and split it into the tag name, and any attributes */
 function parseTag(text: string) {

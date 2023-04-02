@@ -3,12 +3,12 @@ import { rgb8Bit } from "../utils/typeUtils/intRange";
 
 export const canvasConfigOptionsDefault = {
   scale: 2,
-  displayRows: 16,
-  gridSpaceX_du: -1, // measured in DUs
-  gridSpaceY_du: 3, // measured in DUs
+  displayRows: 8,
+  gridSpaceX_du: -3, // measured in DUs
+  gridSpaceY_du: 5, // measured in DUs
   borderColor: [200, 0, 120] as rgb8Bit,
   borderWidth_du: 0,
-  borderGutter_du: 3,
+  borderGutter_du: 5,
 };
 
 /**

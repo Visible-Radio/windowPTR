@@ -1,4 +1,5 @@
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
+import { AttributeMap } from "../lex/lex";
 import { MainStoreState } from "../state/state";
 
 export interface layoutByCharacterArgs {
@@ -18,6 +19,7 @@ export interface SimpleLayoutObject {
   x: number;
   y: number;
   char: string;
+  attributes?: AttributeMap;
 }
 
 export interface DisplayListWithCursor {
