@@ -244,7 +244,7 @@ const PTR = {
   home,
   end,
   setSimpleText(text: string) {
-    store.setState(prev => ({ ...prev, simpleText: text }));
+    store.setState(prev => ({ ...prev, simpleText: text, scrollY_du: 0 }));
   },
 };
 
