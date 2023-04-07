@@ -61,7 +61,7 @@ export function scrollDown(increment = 1) {
   store.setState(prev => {
     const { drawAreaTop_du } = prev.dm;
     const { scrollY_du, layoutList } = prev;
-    const maxScroll = layoutList.at(-1).y - drawAreaTop_du;
+    const maxScroll = layoutList.at(-1)!.y - drawAreaTop_du;
 
     return {
       ...prev,
@@ -86,7 +86,7 @@ export function animatedScrollDown(increment = 1) {
   const step = dm.cellHeight_du + dm.gridSpaceY_du;
   const targetScroll = Math.min(
     scrollY_du + step,
-    layoutList.at(-1).y - dm.drawAreaTop_du
+    layoutList.at(-1)!.y - dm.drawAreaTop_du
   );
 
   function scrollDownAnimation() {
@@ -202,8 +202,8 @@ export function home() {
 export function end() {
   // scroll all the way down
   const { dm, isScrolling, layoutList } = store.getState();
-  const { borderGutter_du, borderWidth_du, cellHeight_du } = dm;
-  const end = layoutList.at(-1).y - borderGutter_du - borderWidth_du;
+  const { borderGutter_du, borderWidth_du } = dm;
+  const end = layoutList.at(-1)!.y - borderGutter_du - borderWidth_du;
   if (isScrolling) return;
   animatedScrollTo(end);
 }
@@ -215,9 +215,19 @@ const PTR = {
   setScroll,
   scrollDown,
   scrollUp,
+  pageDown,
+  pageUp,
+  home,
+  end,
   setSimpleText(text: string) {
     store.setState(prev => ({ ...prev, simpleText: text }));
   },
 };
+
+declare global {
+  interface Window {
+    _PTR: typeof PTR;
+  }
+}
 
 window._PTR = PTR;

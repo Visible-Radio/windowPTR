@@ -14,7 +14,7 @@ export function layoutByToken({ tokens, dm }: layoutByTokenArgs) {
   const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
   let cursorX_du = dm.drawAreaLeft_du;
   let cursorY_du = dm.drawAreaTop_du;
-  const tokenAttributes = { highlight: false, color: null };
+  const tokenAttributes = { highlight: false, color: null, outline: false };
 
   for (const token of tokens) {
     setTokenAttributes(token, tokenAttributes);

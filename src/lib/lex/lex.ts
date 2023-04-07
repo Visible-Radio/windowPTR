@@ -1,8 +1,8 @@
 // may need to move this to prevent import cycles
 export type AttributeMap = {
-  highlight: boolean;
-  color: `rgb(${number},${number},${number})` | null;
-  outline: boolean;
+  highlight?: boolean;
+  color?: `rgb(${number},${number},${number})` | null;
+  outline?: boolean;
 };
 
 export class Text {
