@@ -4,6 +4,10 @@
 
 - It's a canvas based responsive display. Text is reflowed when the container size changes. Overflowing content is handled with scrolling.
 
+## Demo
+
+https://visible-radio.github.io/windowPTR/
+
 ## See also
 
 - NodePTR:
@@ -52,7 +56,7 @@ Defs can be built with https://visible-radio.github.io/react-pixel-character-edi
 
 ## Current API
 
-- The project isn't currently packaged for use. This demo can be manipluated using the API exposed on `window._PTR` via the javascript console.
+- The project isn't currently packaged for use. This demo can be manipluated using the API temporarily exposed on `window._PTR` via the javascript console.
 
 - Scroll up / down, and home / end functionallity is currently bound to the arrow keys as a development-time stopgap.
 
