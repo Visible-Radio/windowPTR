@@ -49,6 +49,28 @@ export function setGridSpace(userGridSpace: number) {
     }),
   }));
 }
+export function setGridSpaceX(userGridSpace: number) {
+  store.setState(prev => ({
+    ...prev,
+    dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
+      ...canvasConfigOptionsDefault,
+      scale: prev.dm.scale,
+      displayRows: prev.dm.displayRows,
+      gridSpaceX_du: userGridSpace,
+    }),
+  }));
+}
+export function setGridSpaceY(userGridSpace: number) {
+  store.setState(prev => ({
+    ...prev,
+    dm: calculateDisplayMetrics(prev.dm.cellWidth_du, prev.root, {
+      ...canvasConfigOptionsDefault,
+      scale: prev.dm.scale,
+      displayRows: prev.dm.displayRows,
+      gridSpaceY_du: userGridSpace,
+    }),
+  }));
+}
 
 export function setScroll(scrollValue: number) {
   store.setState(prev => ({
@@ -212,6 +234,8 @@ const PTR = {
   setScale,
   setRows,
   setGridSpace,
+  setGridSpaceX,
+  setGridSpaceY,
   setScroll,
   scrollDown,
   scrollUp,
