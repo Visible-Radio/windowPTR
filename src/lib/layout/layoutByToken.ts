@@ -1,9 +1,9 @@
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
-import { Tag, Text } from "../lex/lex";
+import { Element, Text } from "../lex/lex";
 import { layoutByCharacter } from "./layoutByCharacter";
 
 export interface layoutByTokenArgs {
-  tokens: (Text | Tag)[];
+  tokens: (Text | Element)[];
   dm: DisplayMetrics;
 }
 
@@ -73,10 +73,10 @@ interface TokenAttributes {
 }
 
 function setTokenAttributes(
-  token: Tag | Text,
+  token: Element | Text,
   tokenAttributes: TokenAttributes
 ) {
-  if (!(token instanceof Tag)) return;
+  if (!(token instanceof Element)) return;
 
   if (token.tag === "span") {
     const { attributes } = token;
