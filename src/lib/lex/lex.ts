@@ -31,6 +31,14 @@ export class Text {
   toString() {
     return `${this.__text}`;
   }
+  get nextSibling(): Node | undefined {
+    if (this.parent) {
+      const thisIndex = this.parent.children.findIndex(node => node === this);
+      const sibling: Node | undefined = this.parent.children[thisIndex + 1];
+      return sibling;
+    }
+    return undefined;
+  }
 }
 
 export class Element {
@@ -64,24 +72,23 @@ export class Element {
   toString() {
     return `<${this.__tagName}>`;
   }
+  get nextSibling(): Node | undefined {
+    if (this.parent) {
+      const thisIndex = this.parent.children.findIndex(node => node === this);
+      const sibling: Node | undefined = this.parent.children[thisIndex + 1];
+      return sibling;
+    }
+    return undefined;
+  }
 }
 
 export type Node = Element | Text;
-
-// export class Parser {
-//   protected __body: string;
-//   protected __unfinished: [];
-//   constructor(body: string) {
-//     this.__body = body;
-//     this.__unfinished = [];
-//   }
-// }
 
 /** Process the markup source and build a document tree from it */
 export function parse(document: string) {
   /** string being built. periodically gets dumped to out when entering or closing a tag. */
   let text = "";
-  const unfinished: Node[] = [];
+  const unfinished: Element[] = [];
   /** whether or not the current character is between a pair of angle brackets  */
   let inTag = false;
   for (const char of document) {
@@ -93,6 +100,10 @@ export function parse(document: string) {
       }
     } else if (char === ">") {
       inTag = false;
+      /* always add a root element*/
+      if (unfinished.length === 0 && text !== "root") {
+        addTag(unfinished, "root");
+      }
       addTag(unfinished, text);
       text = "";
     } else {
@@ -108,36 +119,37 @@ export function parse(document: string) {
 }
 
 /** Add a text node to the parent element's array of children. Mutates the passed-in array */
-export function addText(unfinishedNodeArray: Node[], text: string) {
+export function addText(unfinishedNodeArray: Element[], text: string) {
   const parent = unfinishedNodeArray.at(-1);
-  if (parent && parent instanceof Element) {
+  if (parent) {
     const node = new Text(text, parent);
     parent.children.push(node);
+  } else {
+    addTag(unfinishedNodeArray, "root");
+    addText(unfinishedNodeArray, text);
   }
 }
 
 /** Add an Element node to the end of the unfinished node array, or if encountering a closing tag, add the Element to the parent's array of children. Mutates the passed-in array */
-export function addTag(unfinishedNodeArray: Node[], tag: string) {
+export function addTag(unfinishedNodeArray: Element[], tag: string) {
   if (tag.startsWith("/")) {
     /* closing tag closes the unfinished node stting at the end of the list */
     if (unfinishedNodeArray.length === 1) return;
     const node = unfinishedNodeArray.pop();
     const parent = unfinishedNodeArray.at(-1);
-    if (node && parent instanceof Element) {
+    if (node) {
       parent?.children.push(node);
     }
   } else {
     /* opening tag adds an Element to the unfinished node array */
     const parent = unfinishedNodeArray.at(-1);
-    // if (parent instanceof Element) {
     const node = new Element(tag, {}, parent as Element);
     unfinishedNodeArray.push(node);
-    // }
   }
 }
 
 /** Mutates the passed-in array */
-export function finish(unfinishedNodeArray: Node[]) {
+export function finish(unfinishedNodeArray: Element[]) {
   if (unfinishedNodeArray.length === 0) {
     addTag(unfinishedNodeArray, "root");
   }
@@ -174,6 +186,13 @@ function printTree(node: Node): string {
   console.log(result);
   return result;
 }
+
+printTree(parse(`hello<span>world</span>`)!);
+printTree(
+  parse(`<root>
+hello<span>world</span></root>`)!
+);
+printTree(parse(`<span>hello<span>world</span></span>`)!);
 
 /** Catches strings representing booleans and converts them - otherwise returns the string */
 function coerceBooleans(string: string) {
