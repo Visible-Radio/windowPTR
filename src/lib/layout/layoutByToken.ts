@@ -1,5 +1,5 @@
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
-import { Element, Text } from "../lex/lex";
+import { Element, Text } from "../parse/parser";
 import { layoutByCharacter } from "./layoutByCharacter";
 
 export interface layoutByTokenArgs {
