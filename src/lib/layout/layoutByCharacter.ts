@@ -1,5 +1,6 @@
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
-import { AttributeMap } from "../lex/lex";
+import { AttributeMap } from "../parse/parser";
+
 import { MainStoreState } from "../state/state";
 
 export interface layoutByCharacterArgs {

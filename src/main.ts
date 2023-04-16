@@ -9,16 +9,16 @@ import { DisplayMetrics } from "./utils/typeUtils/configuredCanvas";
 import { store } from "./lib/state/state";
 import { end, home, pageDown, pageUp } from "./lib/actions/actions";
 import { drawScreen } from "./lib/draw/drawScreen";
-import { lex } from "./lib/lex/lex";
-import { layoutByToken } from "./lib/layout/layoutByToken";
+import { layoutByNode } from "./lib/layout/layoutByNode";
+import { parse } from "./lib/parse/parser";
 
 ptrEventEmitter.subscribe("init", ({ data }) => {
   const { getTools, ctx, charDefs, root, simpleText } = data;
   const dm = calculateDisplayMetrics(charDefs.charWidth, root);
   configureCanvas(ctx, dm);
   drawBorder(getTools, dm);
-  const lexed = lex(simpleText);
-  const layoutList = layoutByToken({ tokens: lexed, dm });
+  const tree = parse(simpleText);
+  const layoutList = layoutByNode({ tree, dm });
   drawScreen(layoutList);
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("keydown", e => {
@@ -48,10 +48,10 @@ store.subscribe(
 store.subscribe(
   ({ dm, simpleText }) => ({ dm, simpleText }),
   ({ dm, simpleText }) => {
-    const lexed = lex(simpleText);
+    const tree = parse(simpleText);
 
     store.setState({
-      layoutList: layoutByToken({ dm, tokens: lexed }),
+      layoutList: layoutByNode({ dm, tree }),
     });
   }
 );

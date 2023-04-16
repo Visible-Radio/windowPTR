@@ -156,7 +156,6 @@ export function animatedScrollTo(destinationPosition: number) {
   store.setState({ isScrolling: true });
 
   function frame() {
-    console.log("called");
     const progressFactor = easeInOut(iterations / 60);
     if (direction === "down") {
       const newPosition =
