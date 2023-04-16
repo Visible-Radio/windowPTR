@@ -1,6 +1,8 @@
 import calculateDisplayMetrics, {
   canvasConfigOptionsDefault,
 } from "../calculateDisplayMetrics";
+import { layoutByNode } from "../layout/layoutByNode";
+import { parse } from "../parse/parser";
 import { store } from "../state/state";
 
 export function setScale(userScale: number) {
@@ -229,6 +231,37 @@ export function end() {
   animatedScrollTo(end);
 }
 
+export function appendText(documentText: string) {
+  // note that while we are updating the _layoutList_ our _source_ has not been updated and text reflow on window resize will be broken
+  // instead of manually bumping the Y coord when we append, maybe we need a <P> tag that causes the layout function to increment the Y coord
+  // that way we can update both our _source_ and _layoutList_ but only parse and layout the appended source
+
+  const { layoutList, dm, scrollY_du } = store.getState();
+  const { y } = layoutList.at(-1) ?? {
+    y: dm.drawAreaTop_du,
+  };
+  const tree = parse(documentText);
+  const layoutTOAppend = layoutByNode({
+    tree,
+    dm,
+    initCursorX_du: dm.drawAreaLeft_du,
+    initCursorY_du:
+      layoutList.length > 0 ? y + dm.cellHeight_du + dm.gridSpaceY_du : y,
+  });
+
+  store.setState(prev => ({
+    ...prev,
+    layoutList: prev.layoutList.concat(layoutTOAppend),
+  }));
+
+  // if the message is offscreen, we should scroll to the top of the message
+  /* evil magic number alert - need the padding amount added by modifying chars for outlines */
+  const appendedStart = layoutTOAppend[0].y - 4;
+  if (appendedStart > scrollY_du + dm.drawAreaHeight_du) {
+    animatedScrollTo(layoutTOAppend[0].y - 4);
+  }
+}
+
 const PTR = {
   setScale,
   setRows,
@@ -242,6 +275,7 @@ const PTR = {
   pageUp,
   home,
   end,
+  appendText,
   setSimpleText(text: string) {
     store.setState(prev => ({ ...prev, simpleText: text, scrollY_du: 0 }));
   },

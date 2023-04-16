@@ -15,16 +15,11 @@ const initText = neuromancerText;
 const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
 const intDrawingTools = useDrawingTools(initCtx);
 // const initText = `
-// this text has nothing
 // <span>
-//   <span highlight=true color=rgb(0,0,250)>
-//     This text is colored and highlighted.
-//     <span color=null>the color of this text is reset to the default color</span>
-//     <span highlight=false>even though the parent is highlighted, this span is not</span>
+//   <span outline=true>
+//     Resistance is futile
 //   </span>
-//     This text is just colored
 // </span>
-// this text has nothing
 // `;
 
 export interface MainStoreState {

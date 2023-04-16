@@ -6,16 +6,23 @@ import { SimpleLayoutObject, layoutByCharacter } from "./layoutByCharacter";
 export interface layoutByNodeArgs {
   tree: Element;
   dm: DisplayMetrics;
+  initCursorX_du?: number;
+  initCursorY_du?: number;
 }
 
-export function layoutByNode({ tree, dm }: layoutByNodeArgs) {
+export function layoutByNode({
+  tree,
+  dm,
+  initCursorX_du,
+  initCursorY_du,
+}: layoutByNodeArgs) {
   printTree(tree);
   const initAcc: layoutByNodeAccumulator = {
     layoutList: [] as SimpleLayoutObject[],
     xStep: dm.cellWidth_du + dm.gridSpaceX_du,
     yStep: dm.cellHeight_du + dm.gridSpaceY_du,
-    cursorX_du: dm.drawAreaLeft_du,
-    cursorY_du: dm.drawAreaTop_du,
+    cursorX_du: initCursorX_du ?? dm.drawAreaLeft_du,
+    cursorY_du: initCursorY_du ?? dm.drawAreaTop_du,
   };
 
   return traverseReduce(

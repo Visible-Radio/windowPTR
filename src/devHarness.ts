@@ -46,6 +46,14 @@ const buttons = [
       window._PTR.setSimpleText(neuromancerText);
     },
   },
+  {
+    id: "appendText",
+    text: "append text",
+    onClick: () => {
+      const text = prompt("Append Text");
+      window._PTR.appendText(text ?? "");
+    },
+  },
 ];
 
 const renderInto = document.getElementById("devHarnessButtons");
