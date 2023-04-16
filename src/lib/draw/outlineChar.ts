@@ -59,8 +59,6 @@ function outlineTop(
   args: [def: number[], charWidth: number]
 ): [number[], number] {
   const [def, charWidth] = args;
-  // const topLeft = 0 - charWidth * 2;
-  // const topRight = 0 - charWidth - 1;
   const topLeft = -charWidth;
   const topRight = -1;
   const increment = 1;
@@ -71,12 +69,6 @@ function outlineBottom(
   args: [def: number[], charWidth: number]
 ): [number[], number] {
   const [def, charWidth] = args;
-  // const bottomLeft = charWidth * charWidth - charWidth;
-  // const bottomRight = charWidth * charWidth - 1;
-
-  // const bottomLeft = charWidth * charWidth + charWidth;
-  // const bottomRight = charWidth * charWidth + (charWidth * 2 - 1);
-
   const bottomLeft = charWidth * charWidth;
   const bottomRight = charWidth * charWidth + (charWidth - 1);
 
@@ -93,12 +85,7 @@ function outlineLeft(
 ): [number[], number] {
   const [def, charWidth] = args;
   const topLeft = 0;
-  // const topLeft = 0 - charWidth * 2;
-
-  // const bottomLeft = charWidth * charWidth - charWidth;
-  // const bottomLeft = charWidth * charWidth + charWidth;
   const bottomLeft = charWidth * charWidth;
-
   const increment = charWidth;
   return [def.concat(getEdgePoints(topLeft, bottomLeft, increment)), charWidth];
 }
@@ -108,9 +95,6 @@ function outlineRight(
 ): [number[], number] {
   const [def, charWidth] = args;
   const topRight = charWidth - 1;
-  // const topRight = 0 - charWidth - 1;
-  // const bottomRight = charWidth * charWidth - 1;
-  // const bottomRight = charWidth * charWidth + (charWidth * 2 - 1);
   const bottomRight = charWidth * charWidth + (charWidth - 1);
   const increment = charWidth;
   return [
