@@ -8,7 +8,6 @@ export interface layoutByNodeArgs {
   dm: DisplayMetrics;
 }
 
-/** Takes a list of Tag and Text objects */
 export function layoutByNode({ tree, dm }: layoutByNodeArgs) {
   printTree(tree);
   const initAcc: layoutByNodeAccumulator = {
@@ -65,7 +64,11 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
     });
 
     partialDisplayList.forEach(entry =>
-      acc.layoutList.push({ ...entry, attributes: node.ancestorAttributes })
+      acc.layoutList.push({
+        ...entry,
+        attributes: node.ancestorAttributes,
+        node,
+      })
     );
 
     acc.cursorX_du = newX;
@@ -78,6 +81,7 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
         y: acc.cursorY_du,
         char: " ",
         attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
+        node,
       });
       acc.cursorX_du += acc.xStep;
     }

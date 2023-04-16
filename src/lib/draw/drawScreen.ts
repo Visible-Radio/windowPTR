@@ -7,7 +7,7 @@ import { applyOutline } from "./outlineChar";
 
 export function drawScreen(layoutList: SimpleLayoutObject[]) {
   const { getTools, charDefs, dm, scrollY_du } = store.getState();
-  const { ctx, fillRect_du, clearRect_du } = getTools(dm.scale);
+  const { ctx, clearRect_du } = getTools(dm.scale);
   ctx.fillStyle = rgbToString(dm.borderColor);
 
   clearRect_du(
@@ -30,45 +30,56 @@ export function drawScreen(layoutList: SimpleLayoutObject[]) {
 
     const current = attributes?.highlight
       ? invertChar(charDefs[c], charDefs.charWidth)
-      : attributes?.outline
-      ? applyOutline(
-          charDefs[c],
-          charDefs.charWidth,
-          determineOutline(layoutList, i)
-        )
       : charDefs[c];
 
     ctx.fillStyle = attributes?.color ?? rgbToString(dm.borderColor);
+    drawPoints(current, cursorX_du, cursorY_du);
 
-    current.forEach((point: number) => {
-      const { x, y } = gridPositionFromIndex({
-        index: point,
-        columns: dm.cellWidth_du,
-      });
-
-      const adjustedX = x + cursorX_du;
-      const adjustedY = y + cursorY_du - scrollY_du;
-
-      if (
-        !(
-          dm.drawAreaBottom_du < adjustedY ||
-          adjustedY < dm.drawAreaTop_du - 2 ||
-          adjustedX > dm.drawAreaRight_du + 2
-        )
-      ) {
-        // prevent drawing pixels in gutters
-        fillRect_du(adjustedX, adjustedY, 1, 1);
-      }
-    });
+    if (attributes?.outline) {
+      ctx.fillStyle =
+        typeof attributes?.outline === "string"
+          ? attributes?.outline
+          : rgbToString(dm.borderColor);
+      const outlinePoints = applyOutline(
+        [],
+        charDefs.charWidth,
+        determineOutline(layoutList, i)
+      );
+      drawPoints(outlinePoints, cursorX_du, cursorY_du);
+    }
   }
 }
-/*
- !(
-  dm.drawAreaBottom_du - 1 < adjustedY ||
-  adjustedY < dm.drawAreaTop_du ||
-  adjustedX > dm.drawAreaRight_du + 1
-)
-*/
+
+function drawPoints(
+  points: number[],
+  cursorX_du: number,
+  cursorY_du: number
+): void {
+  const { getTools, dm, scrollY_du } = store.getState();
+  const { fillRect_du } = getTools(dm.scale);
+
+  points.forEach((point: number) => {
+    const { x, y } = gridPositionFromIndex({
+      index: point,
+      columns: dm.cellWidth_du,
+    });
+
+    const adjustedX = x + cursorX_du;
+    const adjustedY = y + cursorY_du - scrollY_du;
+
+    if (
+      !(
+        dm.drawAreaBottom_du < adjustedY ||
+        adjustedY < dm.drawAreaTop_du - 2 ||
+        adjustedX > dm.drawAreaRight_du + 2
+      )
+    ) {
+      // prevent drawing pixels in gutters
+      fillRect_du(adjustedX, adjustedY, 1, 1);
+    }
+  });
+}
+
 function determineOutline(
   layoutList: SimpleLayoutObject[],
   i: number
@@ -76,13 +87,13 @@ function determineOutline(
   const prev = layoutList[i - 1];
   const next = layoutList[i + 1];
 
-  if (!prev.attributes?.outline) {
+  if (!prev?.attributes?.outline) {
     return "start";
   }
-  if (prev.attributes?.outline && next?.attributes?.outline) {
+  if (prev?.attributes?.outline && next?.attributes?.outline) {
     return "middle";
   }
-  if (!next.attributes?.outline) {
+  if (!next?.attributes?.outline) {
     return "end";
   }
   return null;

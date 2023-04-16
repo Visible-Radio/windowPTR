@@ -3,14 +3,8 @@ import { traverseReduce } from "../../utils/traverseReduce";
 export type AttributeMap = {
   highlight?: boolean;
   color?: `rgb(${number},${number},${number})` | null;
-  outline?: boolean;
+  outline?: boolean | `rgb(${number},${number},${number})`;
 };
-
-// const rootAttributes: AttributeMap = {
-//   highlight: false,
-//   color: null,
-//   outline: false,
-// };
 
 const AttributeNamesArr = ["highlight", "color", "outline"] as const;
 

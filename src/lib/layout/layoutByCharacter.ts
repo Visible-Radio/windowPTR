@@ -1,5 +1,5 @@
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
-import { AttributeMap } from "../parse/parser";
+import { AttributeMap, Node, Text } from "../parse/parser";
 
 import { MainStoreState } from "../state/state";
 
@@ -21,6 +21,7 @@ export interface SimpleLayoutObject {
   y: number;
   char: string;
   attributes?: AttributeMap;
+  node?: Text;
 }
 
 export interface DisplayListWithCursor {
