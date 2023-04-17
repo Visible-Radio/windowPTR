@@ -240,19 +240,13 @@ export function appendText(documentText: string) {
   const { y } = layoutList.at(-1) ?? {
     y: dm.drawAreaTop_du,
   };
-  const tree = parse(documentText);
+  const tree = parse(`<p>${documentText}</p>`);
   const layoutTOAppend = layoutByNode({
     tree,
     dm,
     initCursorX_du: dm.drawAreaLeft_du,
-    initCursorY_du:
-      layoutList.length > 0 ? y + dm.cellHeight_du + dm.gridSpaceY_du : y,
+    initCursorY_du: y,
   });
-
-  store.setState(prev => ({
-    ...prev,
-    layoutList: prev.layoutList.concat(layoutTOAppend),
-  }));
 
   // if the message is offscreen, we should scroll to the top of the message
   /* evil magic number alert - need the padding amount added by modifying chars for outlines */
@@ -260,6 +254,12 @@ export function appendText(documentText: string) {
   if (appendedStart > scrollY_du + dm.drawAreaHeight_du) {
     animatedScrollTo(layoutTOAppend[0].y - 4);
   }
+
+  store.setState(prev => ({
+    ...prev,
+    layoutList: prev.layoutList.concat(layoutTOAppend),
+    simpleText: prev.simpleText + `<p>${documentText}</p>`,
+  }));
 }
 
 const PTR = {

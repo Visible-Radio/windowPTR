@@ -11,16 +11,20 @@ import { useDrawingTools } from "../makeDrawingTools";
 const charDefs = modifyDefs(customDefs_charWidth_7);
 const initRoot = document.getElementById("root") as HTMLDivElement;
 const initCtx = makeCanvas(initRoot).getContext("2d")!;
-const initText = neuromancerText;
 const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
 const intDrawingTools = useDrawingTools(initCtx);
-// const initText = `
-// <span>
-//   <span outline=true>
-//     Resistance is futile
-//   </span>
-// </span>
-// `;
+// const initText = neuromancerText;
+const initText = `
+<span>
+  <span outline=true>
+    Resistance is futile
+  </span>
+  <p highlight=true>
+    Resistance is futile
+  </p>
+  <p>We are the Borg. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
+</span>
+`;
 
 export interface MainStoreState {
   layoutList: SimpleLayoutObject[];

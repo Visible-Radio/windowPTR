@@ -28,6 +28,10 @@ export function layoutByNode({
   return traverseReduce(
     tree,
     (acc, node) => {
+      if (node.tag === "p") {
+        acc.cursorY_du += acc.yStep;
+        acc.cursorX_du = dm.drawAreaLeft_du;
+      }
       if (node instanceof Text) {
         layout(node, acc, dm);
       }
@@ -74,7 +78,6 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
       acc.layoutList.push({
         ...entry,
         attributes: node.ancestorAttributes,
-        node,
       })
     );
 
@@ -88,7 +91,6 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
         y: acc.cursorY_du,
         char: " ",
         attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
-        node,
       });
       acc.cursorX_du += acc.xStep;
     }
