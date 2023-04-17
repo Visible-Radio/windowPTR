@@ -224,6 +224,3 @@ function coerceStringsToTypes(string: string) {
       return string;
   }
 }
-
-window._PTR.parse = parse;
-window._PTR.printTree = printTree;

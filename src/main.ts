@@ -46,10 +46,9 @@ store.subscribe(
 );
 
 store.subscribe(
-  ({ dm, simpleText }) => ({ dm, simpleText }),
-  ({ dm, simpleText }) => {
-    const tree = parse(simpleText);
-
+  ({ dm }) => ({ dm }),
+  ({ dm }) => {
+    const tree = parse(store.getState().simpleText);
     store.setState({
       layoutList: layoutByNode({ dm, tree }),
     });
