@@ -1,5 +1,5 @@
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
-import { AttributeMap, Node, Text } from "../parse/parser";
+import { AttributeMap, Text } from "../parse/parser";
 
 import { MainStoreState } from "../state/state";
 

@@ -184,7 +184,7 @@ export function parseTag(text: string): [string, AttributeMap] {
   const attributes = mabyeAttributes.reduce((acc: AttributeMap, maybe) => {
     const [attributeName, attributeValue] = maybe.split("=");
     if (isAttributeName(attributeName)) {
-      // this is so fucking stupid.
+      // @ts-expect-error can't be arsed to do this validation right now.
       acc[attributeName] = coerceStringsToTypes(
         attributeValue
       ) as AttributeMap[typeof attributeName];

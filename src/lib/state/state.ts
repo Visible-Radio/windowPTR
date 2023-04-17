@@ -1,4 +1,3 @@
-import { neuromancerText } from "../../sampleText/neuromancer";
 import { createSubscribableStore } from "../../stateContainer/createSubscribableStore";
 import { makeCanvas } from "../../utils/makeCanvas";
 import { modifyDefs } from "../../utils/modifyDefs";
@@ -13,7 +12,6 @@ const initRoot = document.getElementById("root") as HTMLDivElement;
 const initCtx = makeCanvas(initRoot).getContext("2d")!;
 const initDm = calculateDisplayMetrics(charDefs.charWidth, initRoot);
 const intDrawingTools = useDrawingTools(initCtx);
-// const initText = neuromancerText;
 const initText = `
 <span>
   <span outline=true>
