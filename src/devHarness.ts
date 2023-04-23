@@ -1,4 +1,3 @@
-import { store } from "./lib/state/state";
 import { neuromancerText } from "./sampleText/neuromancer";
 
 const buttons = [
