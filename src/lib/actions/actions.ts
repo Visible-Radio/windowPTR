@@ -292,4 +292,7 @@ declare global {
   }
 }
 
-window._PTR = PTR;
+export function useActions() {
+  window._PTR = PTR;
+  return PTR;
+}
