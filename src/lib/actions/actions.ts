@@ -211,8 +211,9 @@ export function pageUp() {
   const { dm, scrollY_du, isScrolling } = store.getState();
   const { displayRows, gridSpaceY_du, cellHeight_du } = dm;
   const firstRow = scrollY_du - displayRows * (gridSpaceY_du + cellHeight_du);
-  if (firstRow < 0 || isScrolling) return;
-  animatedScrollTo(firstRow);
+  if (isScrolling) return;
+
+  animatedScrollTo(firstRow < 0 ? 0 : firstRow);
 }
 
 export function home() {
@@ -232,10 +233,6 @@ export function end() {
 }
 
 export function appendText(documentText: string) {
-  // note that while we are updating the _layoutList_ our _source_ has not been updated and text reflow on window resize will be broken
-  // instead of manually bumping the Y coord when we append, maybe we need a <P> tag that causes the layout function to increment the Y coord
-  // that way we can update both our _source_ and _layoutList_ but only parse and layout the appended source
-
   const { layoutList, dm, scrollY_du } = store.getState();
   const { y } = layoutList.at(-1) ?? {
     y: dm.drawAreaTop_du,
@@ -262,6 +259,16 @@ export function appendText(documentText: string) {
   }));
 }
 
+function setText(text: string) {
+  const tree = parse(text);
+  const { dm } = store.getState();
+  store.setState({
+    layoutList: layoutByNode({ dm, tree }),
+    simpleText: text,
+    scrollY_du: 0,
+  });
+}
+
 const PTR = {
   setScale,
   setRows,
@@ -276,9 +283,7 @@ const PTR = {
   home,
   end,
   appendText,
-  setSimpleText(text: string) {
-    store.setState(prev => ({ ...prev, simpleText: text, scrollY_du: 0 }));
-  },
+  setText,
 };
 
 declare global {

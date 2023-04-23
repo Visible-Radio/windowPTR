@@ -36,14 +36,14 @@ const buttons = [
     text: "set text",
     onClick: () => {
       const text = prompt("Define display text");
-      window._PTR.setSimpleText(text ?? store.getState().simpleText);
+      window._PTR.setText(text ?? "");
     },
   },
   {
     id: "resetText",
     text: "EXAMPLE",
     onClick: () => {
-      window._PTR.setSimpleText(neuromancerText);
+      window._PTR.setText(neuromancerText);
     },
   },
   {
