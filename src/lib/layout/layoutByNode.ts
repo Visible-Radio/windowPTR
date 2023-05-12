@@ -1,7 +1,7 @@
 import { traverseReduce } from "../../utils/traverseReduce";
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
-import { Element, Text, printTree } from "../parse/parser";
-import { SimpleLayoutObject, layoutByCharacter } from "./layoutByCharacter";
+import { AttributeMap, Element, Text, printTree } from "../parse/parser";
+import { layoutByCharacter } from "./layoutByCharacter";
 
 export interface layoutByNodeArgs {
   tree: Element;
@@ -18,7 +18,7 @@ export function layoutByNode({
 }: layoutByNodeArgs) {
   printTree(tree);
   const initAcc: layoutByNodeAccumulator = {
-    layoutList: [] as SimpleLayoutObject[],
+    layoutList: [] as Char[],
     xStep: dm.cellWidth_du + dm.gridSpaceX_du,
     yStep: dm.cellHeight_du + dm.gridSpaceY_du,
     cursorX_du: initCursorX_du ?? dm.drawAreaLeft_du,
@@ -42,7 +42,7 @@ export function layoutByNode({
 }
 
 interface layoutByNodeAccumulator {
-  layoutList: SimpleLayoutObject[];
+  layoutList: Char[];
   xStep: number;
   yStep: number;
   cursorX_du: number;
@@ -50,6 +50,7 @@ interface layoutByNodeAccumulator {
 }
 
 function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
+  const getNode = () => node;
   const words = node.text.split(" ");
   for (const [i, word] of words.entries()) {
     if (word.length === 0) continue;
@@ -75,10 +76,13 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
     });
 
     partialDisplayList.forEach(entry =>
-      acc.layoutList.push({
-        ...entry,
-        attributes: node.ancestorAttributes,
-      })
+      acc.layoutList.push(
+        new Char({
+          ...entry,
+          attributes: node.ancestorAttributes,
+          node: getNode,
+        })
+      )
     );
 
     acc.cursorX_du = newX;
@@ -86,13 +90,62 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
 
     const notLineStart = acc.cursorX_du !== dm.drawAreaLeft_du;
     if (notLineStart) {
-      acc.layoutList.push({
-        x: acc.cursorX_du,
-        y: acc.cursorY_du,
-        char: " ",
-        attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
-      });
+      acc.layoutList.push(
+        new Char({
+          x: acc.cursorX_du,
+          y: acc.cursorY_du,
+          char: " ",
+          attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
+          node: getNode,
+        })
+      );
       acc.cursorX_du += acc.xStep;
     }
+  }
+}
+
+class Char {
+  protected __x: number;
+  protected __y: number;
+  protected __char: string;
+  protected __attributes: AttributeMap;
+  protected __node: () => Text;
+  constructor({
+    x,
+    y,
+    char,
+    attributes,
+    node,
+  }: {
+    x: number;
+    y: number;
+    char: string;
+    attributes: AttributeMap;
+    node: () => Text;
+  }) {
+    this.__x = x;
+    this.__y = y;
+    this.__char = char;
+    this.__attributes = attributes;
+    this.__node = node;
+  }
+
+  get x() {
+    return this.__x;
+  }
+  get y() {
+    return this.__y;
+  }
+  get coords() {
+    return { x: this.__x, y: this.__y };
+  }
+  getTextNode() {
+    return this.__node();
+  }
+  get char() {
+    return this.__char;
+  }
+  get attributes() {
+    return this.__attributes;
   }
 }
