@@ -5,28 +5,28 @@ const buttons = [
     id: "pageUp",
     text: "page up",
     onClick: () => {
-      window._PTR.pageUp();
+      window._PTR.actions.pageUp();
     },
   },
   {
     id: "pageDown",
     text: "page down",
     onClick: () => {
-      window._PTR.pageDown();
+      window._PTR.actions.pageDown();
     },
   },
   {
     id: "home",
     text: "home",
     onClick: () => {
-      window._PTR.home();
+      window._PTR.actions.home();
     },
   },
   {
     id: "end",
     text: "end",
     onClick: () => {
-      window._PTR.end();
+      window._PTR.actions.end();
     },
   },
 
@@ -35,14 +35,14 @@ const buttons = [
     text: "set text",
     onClick: () => {
       const text = prompt("Define display text");
-      window._PTR.setText(text ?? "");
+      window._PTR.actions.setText(text ?? "");
     },
   },
   {
     id: "resetText",
     text: "EXAMPLE",
     onClick: () => {
-      window._PTR.setText(neuromancerText);
+      window._PTR.actions.setText(neuromancerText);
     },
   },
   {
@@ -50,7 +50,7 @@ const buttons = [
     text: "append text",
     onClick: () => {
       const text = prompt("Append Text");
-      window._PTR.appendText(text ?? "");
+      window._PTR.actions.appendText(text ?? "");
     },
   },
 ];
