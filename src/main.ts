@@ -10,6 +10,9 @@ import { layoutByNode } from "./lib/layout/layoutByNode";
 import { parse } from "./lib/parse/parser";
 import { createPtrGlobalStore } from "./lib/state/state";
 
+// TODO: Pass initial text option
+// TODO: Pass render into element, or generate the element on init
+
 function createPTR(options?: Partial<DisplayConfigOptions>) {
   const displayOptions = {
     ...displayConfigOptionsDefault,
@@ -32,12 +35,8 @@ function createPTR(options?: Partial<DisplayConfigOptions>) {
 
   store.subscribe(
     ({ dm, ctx }) => ({ dm, ctx }),
-    ({ dm, ctx }) => configureCanvas(ctx, dm)
-  );
-
-  store.subscribe(
-    ({ dm }) => ({ dm }),
-    ({ dm }) => {
+    ({ dm, ctx }) => {
+      configureCanvas(ctx, dm);
       const tree = parse(store.getState().simpleText);
       store.setState({
         layoutList: layoutByNode({ dm, tree }),
@@ -46,7 +45,7 @@ function createPTR(options?: Partial<DisplayConfigOptions>) {
   );
 
   store.subscribe(
-    ({ layoutList }) => ({ layoutList }),
+    ({ layoutList, dm }) => ({ layoutList, dm }),
     ({ layoutList }) => {
       drawScreen(layoutList);
     }
