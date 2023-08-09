@@ -1,7 +1,7 @@
 import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
 import { rgb8Bit } from "../utils/typeUtils/intRange";
 
-export const canvasConfigOptionsDefault = {
+export const displayConfigOptionsDefault = {
   scale: 2,
   displayRows: 8,
   gridSpaceX_du: -3, // measured in DUs
@@ -10,6 +10,8 @@ export const canvasConfigOptionsDefault = {
   borderWidth_du: 0,
   borderGutter_du: 5,
 };
+
+export type DisplayConfigOptions = typeof displayConfigOptionsDefault;
 
 /**
  * Calculates displays metrics based on the size of the root element, options, and character def width
@@ -20,7 +22,7 @@ export const canvasConfigOptionsDefault = {
 export default function calculateDisplayMetrics(
   charWidth: number,
   root: HTMLDivElement,
-  options = canvasConfigOptionsDefault
+  options: DisplayConfigOptions
 ): DisplayMetrics {
   const {
     scale,
