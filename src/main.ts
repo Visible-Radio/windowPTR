@@ -81,6 +81,11 @@ const PTR = createPTR({
   scale: 2,
 });
 
+// in order to instantiate more, each PTR needs it's own root div for measurements
+// const PTR_2 = createPTR({
+//   scale: 2,
+// });
+
 declare global {
   interface Window {
     _PTR: typeof PTR;
