@@ -4,11 +4,11 @@ import { AttributeMap, Text } from "../parse/parser";
 import { MainStoreState } from "../state/state";
 
 export interface layoutByCharacterArgs {
-  simpleText: MainStoreState["simpleText"];
+  simpleText: MainStoreState["documentSource"];
   dm: DisplayMetrics;
 }
 export interface layoutByCharacterWithCursorArgs {
-  simpleText: MainStoreState["simpleText"];
+  simpleText: MainStoreState["documentSource"];
   dm: DisplayMetrics;
   initialCursor: {
     x: number;

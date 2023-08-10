@@ -3,7 +3,7 @@ import { MainStoreState } from "../state/state";
 import { layoutByCharacter, SimpleLayoutObject } from "./layoutByCharacter";
 
 export interface layoutByWordArgs {
-  simpleText: MainStoreState["simpleText"];
+  simpleText: MainStoreState["documentSource"];
   dm: DisplayMetrics;
 }
 

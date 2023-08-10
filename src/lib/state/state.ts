@@ -1,5 +1,6 @@
 import { createSubscribableStore } from "../../stateContainer/createSubscribableStore";
 import { makeCanvas } from "../../utils/makeCanvas";
+import { makeRoot } from "../../utils/makeRoot";
 import { modifyDefs } from "../../utils/modifyDefs";
 import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
 import calculateDisplayMetrics, {
@@ -16,19 +17,20 @@ export interface MainStoreState {
   root: HTMLDivElement;
   ctx: CanvasRenderingContext2D;
   getTools: ReturnType<typeof useDrawingTools>;
-  simpleText: string;
+  documentSource: string;
   scrollY_du: number;
   isScrolling: boolean;
 }
 
 /* passing these options isn't really implemented yet 🙃 */
 export const createPtrGlobalStore = (
-  options: Partial<Pick<MainStoreState, "simpleText" | "charDefs">> & {
+  options: Partial<Pick<MainStoreState, "documentSource" | "charDefs">> & {
     displayOptions: DisplayConfigOptions;
+    containerElement: HTMLDivElement;
   }
 ) => {
   const charDefs = modifyDefs(customDefs_charWidth_7);
-  const initRoot = document.getElementById("root") as HTMLDivElement;
+  const initRoot = makeRoot(options.containerElement);
   const initCtx = makeCanvas(initRoot).getContext("2d")!;
   const initDm = calculateDisplayMetrics(
     charDefs.charWidth,
@@ -36,17 +38,6 @@ export const createPtrGlobalStore = (
     options.displayOptions
   );
   const intDrawingTools = useDrawingTools(initCtx);
-  const initText = `
-<span>
-  <span outline=true>
-    Resistance is futile
-  </span>
-  <p highlight=true>
-    Resistance is futile
-  </p>
-  <p>We are the Borg. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
-</span>
-`;
 
   const mainStoreTemplateState = {
     dm: initDm,
@@ -54,7 +45,7 @@ export const createPtrGlobalStore = (
     root: initRoot,
     ctx: initCtx,
     getTools: intDrawingTools,
-    simpleText: initText,
+    documentSource: "",
     scrollY_du: 0,
     layoutList: [] as SimpleLayoutObject[],
     isScrolling: false,
