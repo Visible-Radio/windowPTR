@@ -291,6 +291,8 @@ export function createActions(
     end,
     appendText,
     setText,
+    animatedScrollDown,
+    animatedScrollUp,
   };
   return PTR;
 }
