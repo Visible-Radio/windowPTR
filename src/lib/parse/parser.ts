@@ -207,7 +207,7 @@ export function printTree(node: Node): string {
     },
     { out: "" }
   ).out;
-  console.log(result);
+
   return result;
 }
 

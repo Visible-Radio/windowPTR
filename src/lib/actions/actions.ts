@@ -262,7 +262,7 @@ export function createActions(
     store.setState(prev => ({
       ...prev,
       layoutList: prev.layoutList.concat(layoutTOAppend),
-      simpleText: prev.simpleText + `<p>${documentText}</p>`,
+      documentSource: prev.documentSource + `<p>${documentText}</p>`,
     }));
   }
 
@@ -271,7 +271,7 @@ export function createActions(
     const { dm } = store.getState();
     store.setState({
       layoutList: layoutByNode({ dm, tree }),
-      simpleText: text,
+      documentSource: text,
       scrollY_du: 0,
     });
   }
