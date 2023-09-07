@@ -85,3 +85,11 @@ export function createPTR(
 
   return { actions, store };
 }
+
+declare global {
+  interface Window {
+    _createPTR: typeof createPTR;
+  }
+}
+
+window._createPTR = createPTR;
