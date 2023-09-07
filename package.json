@@ -22,7 +22,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "predeploy": "npm run build",
+    "predeploy": "tsc && vite build --config vite.config-gh-pages.js",
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
