@@ -1,7 +1,21 @@
 {
-  "name": "ptr",
-  "private": true,
-  "version": "0.0.0",
+  "name": "ptr-window",
+  "private": false,
+  "author": "Patrick Kaipainen",
+  "description": "A responsive canvas based text renderer.",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/ptr.cjs",
+  "module": "./dist/ptr.js",
+  "exports": {
+    ".": {
+      "import": "./dist/ptr.js",
+      "require": "./dist/ptr.cjs"
+    }
+  },
+  "types": "./dist/ptr.d.ts",
+  "version": "0.0.3",
   "type": "module",
   "homepage": "https://visible-radio.github.io/windowPTR/",
   "scripts": {
@@ -12,12 +26,14 @@
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
+    "@types/node": "^20.5.0",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
     "eslint": "^8.32.0",
     "gh-pages": "^5.0.0",
     "typescript": "^4.9.3",
-    "vite": "^4.0.0"
+    "vite": "^4.0.0",
+    "vite-plugin-dts": "^3.5.2"
   },
   "dependencies": {
     "vitest": "^0.28.5"
