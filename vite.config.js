@@ -1,3 +1,4 @@
+// used when packaging the library for distribution
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
