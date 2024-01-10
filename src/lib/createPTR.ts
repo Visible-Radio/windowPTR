@@ -12,6 +12,9 @@ import { createPtrGlobalStore } from "./state/state";
 
 // TODO: Pass initial text option
 // TODO: Pass charDefs
+// TODO: 'teletype' text animation on first draw
+// TODO: 'blink' text animation on first draw
+// TODO: persistent blink animatino
 
 export function createPTR(
   containerElement: HTMLDivElement,
