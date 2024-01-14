@@ -2,7 +2,8 @@ import { createPTR } from "./lib/createPTR";
 import { neuromancerText } from "./sampleText/neuromancer";
 
 const PTR = createPTR(document.getElementById("root") as HTMLDivElement, {
-  scale: 2,
+  scale: 6,
+  displayRows: 1,
 });
 
 declare global {

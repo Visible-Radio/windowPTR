@@ -41,7 +41,7 @@ export function createPTR(
   drawBorder(getTools, dm);
   const tree = parse(simpleText);
   const layoutList = layoutByNode({ tree, dm });
-  drawScreen(layoutList);
+  drawScreen(layoutList, false);
   window.addEventListener("resize", onWindowResize);
   store.setState(prev => ({ ...prev, dm, layoutList }));
 
@@ -59,14 +59,14 @@ export function createPTR(
   store.subscribe(
     ({ layoutList, dm }) => ({ layoutList, dm }),
     ({ layoutList }) => {
-      drawScreen(layoutList);
+      drawScreen(layoutList, false);
     }
   );
 
   store.subscribe(
     ({ scrollY_du }) => ({ scrollY_du }),
     () => {
-      drawScreen(store.getState().layoutList);
+      drawScreen(store.getState().layoutList, false);
     }
   );
 

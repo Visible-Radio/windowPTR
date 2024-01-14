@@ -78,6 +78,7 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
       acc.layoutList.push({
         ...entry,
         attributes: node.ancestorAttributes,
+        isNew: true,
       })
     );
 
@@ -91,6 +92,7 @@ function layout(node: Text, acc: layoutByNodeAccumulator, dm: DisplayMetrics) {
         y: acc.cursorY_du,
         char: " ",
         attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
+        isNew: true,
       });
       acc.cursorX_du += acc.xStep;
     }

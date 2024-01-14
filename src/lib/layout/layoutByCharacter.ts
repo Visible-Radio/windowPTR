@@ -22,6 +22,7 @@ export interface SimpleLayoutObject {
   char: string;
   attributes?: AttributeMap;
   node?: Text;
+  isNew: boolean;
 }
 
 export interface DisplayListWithCursor {
@@ -42,7 +43,7 @@ export function layoutByCharacter(
   input: layoutByCharacterArgs | layoutByCharacterWithCursorArgs
 ): SimpleLayoutObject[] | DisplayListWithCursor {
   const { dm, simpleText } = input;
-  const layoutList = [];
+  const layoutList: SimpleLayoutObject[] | DisplayListWithCursor = [];
   const xStep = dm.cellWidth_du + dm.gridSpaceX_du;
   const yStep = dm.cellHeight_du + dm.gridSpaceY_du;
   const lastColumnXCoord = dm.getColumnXCoord_du(dm.displayColumns - 1);
@@ -56,7 +57,7 @@ export function layoutByCharacter(
   }
 
   for (const char of simpleText) {
-    layoutList.push({ x: cursorX_du, y: cursorY_du, char });
+    layoutList.push({ x: cursorX_du, y: cursorY_du, char, isNew: true });
 
     if (char === "\n") {
       // jump to a new row on \n

@@ -19,7 +19,8 @@ export default function drawCellOutlines(
 
   const { strokeRect_du, ctx } = getTools(scale);
 
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 0.5;
+  ctx.strokeStyle = "rgb(0,200,0)";
 
   for (let row = 0; row < displayRows; row++) {
     for (let col = 0; col < displayColumns; col++) {
