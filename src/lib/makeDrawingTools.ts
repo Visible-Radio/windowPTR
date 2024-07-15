@@ -1,4 +1,4 @@
-import makeDu from "./makeDu";
+import makeDu from './makeDu';
 
 /**
  *
@@ -37,24 +37,6 @@ export default function makeDrawingTools(
 
   return {
     ctx,
-    /**
-     * @remarks inputs are adjusted by the current scale value
-     */
-    moveTo_du(...args: Parameters<typeof ctx.moveTo>) {
-      return withDu(ctx.moveTo)(...args);
-    },
-    /**
-     * @remarks inputs are adjusted by the current scale value
-     */
-    lineTo_du(...args: Parameters<typeof ctx.lineTo>) {
-      return withDu(ctx.lineTo)(...args);
-    },
-    /**
-     * @remarks inputs are adjusted by the current scale value
-     */
-    drawRect_du(...args: Parameters<typeof ctx.rect>) {
-      return withDu(ctx.rect)(...args);
-    },
     /**
      * @remarks inputs are adjusted by the current scale value
      */

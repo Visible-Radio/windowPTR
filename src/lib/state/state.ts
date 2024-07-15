@@ -1,18 +1,18 @@
-import { createSubscribableStore } from "../../stateContainer/createSubscribableStore";
-import { makeCanvas } from "../../utils/makeCanvas";
-import { makeRoot } from "../../utils/makeRoot";
-import { modifyDefs } from "../../utils/modifyDefs";
-import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
+import { createSubscribableStore } from '../../stateContainer/createSubscribableStore';
+import { makeCanvas } from '../../utils/makeCanvas';
+import { makeRoot } from '../../utils/makeRoot';
+import { modifyDefs } from '../../utils/modifyDefs';
+import { TDisplayMetrics } from '../../utils/typeUtils/configuredCanvas';
 import calculateDisplayMetrics, {
   DisplayConfigOptions,
-} from "../calculateDisplayMetrics";
-import customDefs_charWidth_7 from "../customDefs_charWidth_7";
-import { SimpleLayoutObject } from "../layout/layoutByCharacter";
-import { useDrawingTools } from "../makeDrawingTools";
+} from '../calculateDisplayMetrics';
+import customDefs_charWidth_7 from '../customDefs_charWidth_7';
+import { SimpleLayoutObject } from '../layout/layoutByCharacter';
+import { useDrawingTools } from '../makeDrawingTools';
 
 export interface MainStoreState {
   layoutList: SimpleLayoutObject[];
-  dm: DisplayMetrics;
+  dm: TDisplayMetrics;
   charDefs: ReturnType<typeof modifyDefs>;
   root: HTMLDivElement;
   ctx: CanvasRenderingContext2D;
@@ -24,14 +24,14 @@ export interface MainStoreState {
 
 /* passing these options isn't really implemented yet 🙃 */
 export const createPtrGlobalStore = (
-  options: Partial<Pick<MainStoreState, "documentSource" | "charDefs">> & {
+  options: Partial<Pick<MainStoreState, 'documentSource' | 'charDefs'>> & {
     displayOptions: DisplayConfigOptions;
     containerElement: HTMLDivElement;
   }
 ) => {
   const charDefs = modifyDefs(customDefs_charWidth_7);
   const initRoot = makeRoot(options.containerElement);
-  const initCtx = makeCanvas(initRoot).getContext("2d")!;
+  const initCtx = makeCanvas(initRoot).getContext('2d')!;
   const initDm = calculateDisplayMetrics(
     charDefs.charWidth,
     initRoot,
@@ -45,7 +45,7 @@ export const createPtrGlobalStore = (
     root: initRoot,
     ctx: initCtx,
     getTools: intDrawingTools,
-    documentSource: "",
+    documentSource: '',
     scrollY_du: 0,
     layoutList: [] as SimpleLayoutObject[],
     isScrolling: false,

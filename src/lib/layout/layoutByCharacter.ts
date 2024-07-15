@@ -1,28 +1,28 @@
-import { DisplayMetrics } from "../../utils/typeUtils/configuredCanvas";
-import { AttributeMap, Text } from "../parse/parser";
+import { TDisplayMetrics } from '../../utils/typeUtils/configuredCanvas';
+import { AttributeMap, Text } from '../parse/parser';
 
-import { MainStoreState } from "../state/state";
+import { MainStoreState } from '../state/state';
 
 export interface layoutByCharacterArgs {
-  simpleText: MainStoreState["documentSource"];
-  dm: DisplayMetrics;
+  simpleText: MainStoreState['documentSource'];
+  dm: TDisplayMetrics;
 }
 export interface layoutByCharacterWithCursorArgs {
-  simpleText: MainStoreState["documentSource"];
-  dm: DisplayMetrics;
+  simpleText: MainStoreState['documentSource'];
+  dm: TDisplayMetrics;
   initialCursor: {
     x: number;
     y: number;
   };
 }
 
-export interface SimpleLayoutObject {
+export type SimpleLayoutObject = {
   x: number;
   y: number;
   char: string;
   attributes?: AttributeMap;
   node?: Text;
-}
+};
 
 export interface DisplayListWithCursor {
   layoutList: SimpleLayoutObject[];
@@ -50,7 +50,7 @@ export function layoutByCharacter(
   let cursorX_du = dm.drawAreaLeft_du;
   let cursorY_du = dm.drawAreaTop_du;
 
-  if ("initialCursor" in input) {
+  if ('initialCursor' in input) {
     cursorX_du = input.initialCursor.x;
     cursorY_du = input.initialCursor.y;
   }
@@ -58,7 +58,7 @@ export function layoutByCharacter(
   for (const char of simpleText) {
     layoutList.push({ x: cursorX_du, y: cursorY_du, char });
 
-    if (char === "\n") {
+    if (char === '\n') {
       // jump to a new row on \n
       // this is quick and dirty. We may actually want newlines in the layoutList
       cursorX_du = dm.drawAreaLeft_du;
@@ -66,7 +66,7 @@ export function layoutByCharacter(
       continue;
     }
 
-    if (cursorX_du === dm.getColumnXCoord_du(0) && char === " ") {
+    if (cursorX_du === dm.getColumnXCoord_du(0) && char === ' ') {
       // omit spaces at the start of a row
       continue;
     }
@@ -79,7 +79,7 @@ export function layoutByCharacter(
     }
   }
 
-  if ("initialCursor" in input) {
+  if ('initialCursor' in input) {
     return { layoutList, x: cursorX_du, y: cursorY_du };
   } else {
     return layoutList;

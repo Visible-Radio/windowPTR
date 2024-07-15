@@ -1,11 +1,11 @@
-import { rgbToString } from "../utils/rgbToString";
-import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
+import { rgbToString } from '../utils/rgbToString';
+import { TDisplayMetrics } from '../utils/typeUtils/configuredCanvas';
 
-import { useDrawingTools } from "./makeDrawingTools";
+import { useDrawingTools } from './makeDrawingTools';
 
 export default function drawBorder(
   getTools: ReturnType<typeof useDrawingTools>,
-  dm: DisplayMetrics
+  dm: TDisplayMetrics
 ) {
   const {
     borderColor,

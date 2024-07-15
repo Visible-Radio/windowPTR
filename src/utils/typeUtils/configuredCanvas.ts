@@ -1,6 +1,6 @@
-import { rgb8Bit } from "./intRange";
+import { rgb8Bit } from './intRange';
 
-export type DisplayMetrics = Readonly<{
+export type TDisplayMetrics = Readonly<{
   borderColor: rgb8Bit;
   /**
    * horizontal grid gap in Display Units between character cells
@@ -91,17 +91,17 @@ export type DisplayMetrics = Readonly<{
   scale: number;
 
   /** Determines the x cooridinate of the given column. Input is zero indexed. */
-  getColumnXCoord_du: (columnNo: number) => number;
+  // getColumnXCoord_du: (columnNo: number) => number;
 
-  /** Determines the column number of the given x coordinate.*/
-  getColumnFromXCoord_du: (xCoord: number) => number;
+  // /** Determines the column number of the given x coordinate.*/
+  // getColumnFromXCoord_du: (xCoord: number) => number;
 
-  /** Determines the amount of space in display units to the right of the given xCoord.*/
-  getRemainingRowSpace_du: (xCoord: number) => number;
+  // /** Determines the amount of space in display units to the right of the given xCoord.*/
+  // getRemainingRowSpace_du: (xCoord: number) => number;
 
-  /** Returns the space in display units required to layout a piece of text on the display */
-  measureText: (text: string) => number;
+  // /** Returns the space in display units required to layout a piece of text on the display */
+  // measureText: (text: string) => number;
 
-  /** Determines whether a piece of text fits in a row */
-  textFits: (text: string, xCoord: number) => boolean;
+  // /** Determines whether a piece of text fits in a row */
+  // textFits: (text: string, xCoord: number) => boolean;
 }>;

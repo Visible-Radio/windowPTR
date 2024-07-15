@@ -1,9 +1,9 @@
-import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
-import { useDrawingTools } from "./makeDrawingTools";
+import { TDisplayMetrics } from '../utils/typeUtils/configuredCanvas';
+import { useDrawingTools } from './makeDrawingTools';
 
 export default function drawCellOutlines(
   getTools: ReturnType<typeof useDrawingTools>,
-  dm: DisplayMetrics
+  dm: TDisplayMetrics
 ) {
   const {
     drawAreaLeft_du,

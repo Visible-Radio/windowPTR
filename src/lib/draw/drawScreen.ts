@@ -1,104 +1,102 @@
-import { gridPositionFromIndex } from "../../utils/gridPositionFromIndex";
-import { rgbToString } from "../../utils/rgbToString";
-import { SimpleLayoutObject } from "../layout/layoutByCharacter";
-import { createPtrGlobalStore } from "../state/state";
-import { invertChar } from "./invertChar";
-import { applyOutline } from "./outlineChar";
+import { gridPositionFromIndex } from '../../utils/gridPositionFromIndex';
+import { rgbToString } from '../../utils/rgbToString';
+import { PTR } from '../PTR';
+import { SimpleLayoutObject } from '../layout/layoutByCharacter';
+import { invertChar } from './invertChar';
+import { applyOutline } from './outlineChar';
 
-export function createDrawScreen(
-  store: ReturnType<typeof createPtrGlobalStore>
-) {
-  return function drawScreen(layoutList: SimpleLayoutObject[]) {
-    const { getTools, charDefs, dm, scrollY_du } = store.getState();
-    const { ctx, clearRect_du } = getTools(dm.scale);
-    ctx.fillStyle = rgbToString(dm.borderColor);
+export function drawScreen(ptr: PTR) {
+  const scrollY_du = ptr.scrollY;
+  const { clearRect_du } = ptr.drawingTools;
+  const { values } = ptr.dm;
+  const { layoutList } = ptr.layout;
+  const { ctx } = ptr;
 
-    clearRect_du(
-      dm.drawAreaLeft_du,
-      dm.drawAreaTop_du - 2,
-      dm.drawAreaRight_du,
-      dm.drawAreaHeight_du + 3
-    );
+  ptr.ctx.fillStyle = rgbToString(values.borderColor);
 
-    for (let i = 0; i < layoutList.length; i++) {
-      const { x: cursorX_du, y: cursorY_du, char, attributes } = layoutList[i];
-      if (
-        cursorY_du > scrollY_du + dm.drawAreaBottom_du ||
-        cursorY_du + dm.cellHeight_du < scrollY_du
-      ) {
-        continue;
-      }
+  clearRect_du(
+    values.drawAreaLeft_du,
+    values.drawAreaTop_du - 2,
+    values.drawAreaRight_du,
+    values.drawAreaHeight_du + 3
+  );
 
-      const c = char.toUpperCase() in charDefs ? char.toUpperCase() : " ";
-
-      const current = attributes?.highlight
-        ? invertChar(charDefs[c], charDefs.charWidth)
-        : charDefs[c];
-
-      ctx.fillStyle = attributes?.color ?? rgbToString(dm.borderColor);
-      drawPoints(current, cursorX_du, cursorY_du);
-
-      if (attributes?.outline) {
-        ctx.fillStyle =
-          typeof attributes?.outline === "string"
-            ? attributes?.outline
-            : rgbToString(dm.borderColor);
-        const outlinePoints = applyOutline(
-          [],
-          charDefs.charWidth,
-          determineOutline(layoutList, i)
-        );
-        drawPoints(outlinePoints, cursorX_du, cursorY_du);
-      }
+  for (let i = 0; i < layoutList.length; i++) {
+    const { x: cursorX_du, y: cursorY_du, char, attributes } = layoutList[i];
+    if (
+      cursorY_du > scrollY_du + values.drawAreaBottom_du ||
+      cursorY_du + values.cellHeight_du < scrollY_du
+    ) {
+      continue;
     }
-  };
 
-  function drawPoints(
-    points: number[],
-    cursorX_du: number,
-    cursorY_du: number
-  ): void {
-    const { getTools, dm, scrollY_du } = store.getState();
-    const { fillRect_du } = getTools(dm.scale);
+    const c = char.toUpperCase() in ptr.defs ? char.toUpperCase() : ' ';
 
-    points.forEach((point: number) => {
-      const { x, y } = gridPositionFromIndex({
-        index: point,
-        columns: dm.cellWidth_du,
-      });
+    const current = attributes?.highlight
+      ? invertChar(ptr.defs[c], ptr.defs.charWidth)
+      : ptr.defs[c];
 
-      const adjustedX = x + cursorX_du;
-      const adjustedY = y + cursorY_du - scrollY_du;
+    ctx.fillStyle = attributes?.color ?? rgbToString(values.borderColor);
+    drawPoints(current, cursorX_du, cursorY_du, ptr);
 
-      if (
-        !(
-          dm.drawAreaBottom_du < adjustedY ||
-          adjustedY < dm.drawAreaTop_du - 2 ||
-          adjustedX > dm.drawAreaRight_du + 2
-        )
-      ) {
-        // prevent drawing pixels in gutters
-        fillRect_du(adjustedX, adjustedY, 1, 1);
-      }
+    if (attributes?.outline) {
+      ctx.fillStyle =
+        typeof attributes?.outline === 'string'
+          ? attributes?.outline
+          : rgbToString(values.borderColor);
+      const outlinePoints = applyOutline(
+        [],
+        ptr.defs.charWidth,
+        determineOutline(layoutList, i)
+      );
+      drawPoints(outlinePoints, cursorX_du, cursorY_du, ptr);
+    }
+  }
+}
+
+function drawPoints(
+  points: number[],
+  cursorX_du: number,
+  cursorY_du: number,
+  ptr: PTR
+): void {
+  points.forEach((point: number) => {
+    const { x, y } = gridPositionFromIndex({
+      index: point,
+      columns: ptr.dm.values.cellWidth_du,
     });
-  }
 
-  function determineOutline(
-    layoutList: SimpleLayoutObject[],
-    i: number
-  ): "start" | "middle" | "end" | null {
-    const prev = layoutList[i - 1];
-    const next = layoutList[i + 1];
+    const adjustedX = x + cursorX_du;
+    const adjustedY = y + cursorY_du - ptr.scrollY;
 
-    if (!prev?.attributes?.outline) {
-      return "start";
+    if (
+      !(
+        ptr.dm.values.drawAreaBottom_du < adjustedY ||
+        adjustedY < ptr.dm.values.drawAreaTop_du - 2 ||
+        adjustedX > ptr.dm.values.drawAreaRight_du + 2
+      )
+    ) {
+      // prevent drawing pixels in gutters
+      ptr.drawingTools.fillRect_du(adjustedX, adjustedY, 1, 1);
     }
-    if (prev?.attributes?.outline && next?.attributes?.outline) {
-      return "middle";
-    }
-    if (!next?.attributes?.outline) {
-      return "end";
-    }
-    return null;
+  });
+}
+
+function determineOutline(
+  layoutList: SimpleLayoutObject[],
+  i: number
+): 'start' | 'middle' | 'end' | null {
+  const prev = layoutList[i - 1];
+  const next = layoutList[i + 1];
+
+  if (!prev?.attributes?.outline) {
+    return 'start';
   }
+  if (prev?.attributes?.outline && next?.attributes?.outline) {
+    return 'middle';
+  }
+  if (!next?.attributes?.outline) {
+    return 'end';
+  }
+  return null;
 }

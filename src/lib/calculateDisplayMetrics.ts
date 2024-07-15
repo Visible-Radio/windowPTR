@@ -1,5 +1,5 @@
-import { DisplayMetrics } from "../utils/typeUtils/configuredCanvas";
-import { rgb8Bit } from "../utils/typeUtils/intRange";
+import { TDisplayMetrics } from '../utils/typeUtils/configuredCanvas';
+import { rgb8Bit } from '../utils/typeUtils/intRange';
 
 export const displayConfigOptionsDefault = {
   scale: 2,
@@ -23,7 +23,7 @@ export default function calculateDisplayMetrics(
   charWidth: number,
   root: HTMLDivElement,
   options: DisplayConfigOptions
-): DisplayMetrics {
+): TDisplayMetrics {
   const {
     scale,
     displayRows,
@@ -81,7 +81,7 @@ export default function calculateDisplayMetrics(
   // could also add lastColumnXCoord_du
   // or even an array of all column xCoords
 
-  const displayMetrics: DisplayMetrics = {
+  const displayMetrics: TDisplayMetrics = {
     displayWidth_px,
     displayHeight_px,
     displayWidth_du,
@@ -105,31 +105,31 @@ export default function calculateDisplayMetrics(
     drawAreaHeight_du,
     cellWidth_du,
     cellHeight_du,
-    getColumnXCoord_du(columnNo) {
-      return (
-        columnNo * cellWidth_du + gridSpaceX_du * columnNo + drawAreaLeft_du
-      );
-    },
-    getColumnFromXCoord_du(xCoord) {
-      let col = 0;
-      let seek = 0;
-      while (seek !== xCoord - drawAreaLeft_du) {
-        seek += cellWidth_du + gridSpaceX_du;
-        col += 1;
-      }
-      return col;
-    },
-    getRemainingRowSpace_du(xCoord) {
-      return displayWidth_du - xCoord - drawAreaLeft_du;
-    },
-    measureText(text) {
-      return text.length * cellWidth_du + (text.length - 1) * gridSpaceX_du;
-    },
-    textFits(text, xCoord) {
-      // word.length * dm.cellWidth_du + (word.length - 1) * dm.gridSpaceX_du >
-      // dm.getRemainingRowSpace_du(cursorX_du)
-      return this.measureText(text) <= this.getRemainingRowSpace_du(xCoord);
-    },
+    // getColumnXCoord_du(columnNo) {
+    //   return (
+    //     columnNo * cellWidth_du + gridSpaceX_du * columnNo + drawAreaLeft_du
+    //   );
+    // },
+    // getColumnFromXCoord_du(xCoord) {
+    //   let col = 0;
+    //   let seek = 0;
+    //   while (seek !== xCoord - drawAreaLeft_du) {
+    //     seek += cellWidth_du + gridSpaceX_du;
+    //     col += 1;
+    //   }
+    //   return col;
+    // },
+    // getRemainingRowSpace_du(xCoord) {
+    //   return displayWidth_du - xCoord - drawAreaLeft_du;
+    // },
+    // measureText(text) {
+    //   return text.length * cellWidth_du + (text.length - 1) * gridSpaceX_du;
+    // },
+    // textFits(text, xCoord) {
+    //   // word.length * dm.cellWidth_du + (word.length - 1) * dm.gridSpaceX_du >
+    //   // dm.getRemainingRowSpace_du(cursorX_du)
+    //   return this.measureText(text) <= this.getRemainingRowSpace_du(xCoord);
+    // },
   };
 
   return displayMetrics;
