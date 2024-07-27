@@ -7,19 +7,11 @@ import { applyOutline } from './outlineChar';
 
 export function drawScreen(ptr: PTR) {
   const scrollY_du = ptr.scrollY;
-  const { clearRect_du } = ptr.drawingTools;
   const { values } = ptr.dm;
   const { layoutList } = ptr.layout;
   const { ctx } = ptr;
 
   ptr.ctx.fillStyle = rgbToString(values.borderColor);
-
-  clearRect_du(
-    values.drawAreaLeft_du,
-    values.drawAreaTop_du - 2,
-    values.drawAreaRight_du,
-    values.drawAreaHeight_du + 3
-  );
 
   for (let i = 0; i < layoutList.length; i++) {
     const { x: cursorX_du, y: cursorY_du, char, attributes } = layoutList[i];

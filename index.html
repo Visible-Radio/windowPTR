@@ -6,7 +6,9 @@
   </head>
   <body>
     <main>
-      <div id="root"></div>
+      <div class="ptr-group-container">
+        <div id="root" class="root"></div>
+      </div>
       <div class="buttonGroup" id="devHarnessButtons"></div>
     </main>
     <script type="module" src="/src/devHarness.ts"></script>
@@ -21,7 +23,11 @@
         gap: 4rem;
       }
 
-      #root > div {
+      .root > div {
+        width: 100%;
+      }
+
+      .ptr-group-container {
         width: 100%;
       }
 

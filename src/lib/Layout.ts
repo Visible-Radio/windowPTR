@@ -96,14 +96,14 @@ export class Layout {
       );
 
       const notLineStart = this.cursor.x !== drawAreaLeft_du;
+      this.layoutList.push({
+        x: this.cursor.x,
+        y: this.cursor.y,
+        char: ' ',
+        node,
+        attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
+      });
       if (notLineStart) {
-        this.layoutList.push({
-          x: this.cursor.x,
-          y: this.cursor.y,
-          char: ' ',
-          node,
-          attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
-        });
         this.cursor.x += this.stepX;
       }
     }

@@ -3,12 +3,22 @@ import { rgbToString } from '../utils/rgbToString';
 import { rgb8Bit } from '../utils/typeUtils/intRange';
 import { DisplayMetrics } from './DisplayMetrics';
 import { Layout } from './Layout';
+import { Letters } from './actors';
+import { ScrollHandler } from './ScrollHandler';
 import { DisplayConfigOptions } from './calculateDisplayMetrics';
 import configureCanvas from './configureCanvas';
 import customDefs_charWidth_7 from './customDefs_charWidth_7';
-import { drawScreen } from './draw/drawScreen';
 import makeDrawingTools from './makeDrawingTools';
 import { Element, parse, printTree } from './parse/parser';
+
+/* we may have 2 kinds of animations.
+  - per letter animations that run on initial draw or persistently after initial draw
+  - TextNode animations, that run when we've finished the initial draw for all of the text node's letters */
+
+/* PTR's update method will need to regulate the introduction of each letter
+  - ie, finish drawing each letter before adding the next
+  - in doing this, it can track when the current node isn't the same as the last node
+    - at that point, if the TextNode has animations attached to it, they can be run */
 
 export class PTR {
   public rootElement: HTMLDivElement;
@@ -22,6 +32,8 @@ export class PTR {
   public documentTree: Element;
   public layout: Layout;
   public scrollY = 0;
+  letters: Letters;
+  scrollHandler: ScrollHandler;
   constructor(
     containerElement: HTMLDivElement,
     options: Partial<DisplayConfigOptions & { documentSource: string }>
@@ -41,6 +53,7 @@ export class PTR {
       borderWidth_du: 1,
       borderGutter_du: 5,
       documentSource: '',
+      drawCellOutlines: false,
       ...options,
     };
     this.dm = new DisplayMetrics({
@@ -54,40 +67,72 @@ export class PTR {
     this.documentTree = parse(this.documentSource);
 
     this.layout = new Layout(this);
+    this.letters = new Letters(this);
+    this.scrollHandler = new ScrollHandler(this);
 
     console.log(printTree(this.documentTree));
+    new Letters(this);
 
     window.addEventListener('resize', () => this.onWindowResize(this));
   }
+
   onWindowResize(ptr: PTR) {
     this.dm.calculateMetrics();
     configureCanvas(ptr.ctx, this.dm.values);
     this.layout = new Layout(this);
+    this.letters.updateLayout();
+  }
+
+  appendToDocument(incomingDocument: string) {
+    if (this.layout.layoutList.length === 0) {
+      return this.setDocument(incomingDocument);
+    }
+    const incomingDocumentTree = parse(incomingDocument);
+    incomingDocumentTree.children.forEach((node) =>
+      this.documentTree.children.push(node)
+    );
+    // not really efficient - we redo the layout, even for things we have already done
+    this.layout = new Layout(this);
+    this.letters.addLetters();
+    console.log(printTree(this.documentTree));
+  }
+
+  setDocument(document: string) {
+    this.documentSource = document;
+    this.documentTree = parse(this.documentSource);
+    this.layout = new Layout(this);
+    this.letters = new Letters(this);
+    this.scrollY = 0;
+    console.log(printTree(this.documentTree));
   }
 
   update(deltaTime: number) {
-    /*  */
+    this.letters.update(deltaTime);
+    this.scrollHandler.update(deltaTime);
   }
+
   draw(deltaTime: number) {
     this.clearDrawArea();
+
+    const letterPixels = this.letters.list
+      .map((letter) => letter.getFrame())
+      .flat();
+
+    letterPixels.forEach((pixel) => {
+      this.ctx.fillStyle = rgbToString(pixel.color);
+      this.drawingTools.fillRect_du(pixel.x, pixel.y - this.scrollY, 1, 1);
+    });
     this.drawBorder();
-    drawScreen(this);
-    // this.drawCellOutlines();
+    this.drawCellOutlines();
   }
+
   clearDrawArea() {
-    const {
-      drawAreaLeft_du,
-      drawAreaTop_du,
-      drawAreaRight_du,
-      drawAreaHeight_du,
-    } = this.dm.values;
-    this.drawingTools.clearRect_du(
-      drawAreaLeft_du,
-      drawAreaTop_du - 2,
-      drawAreaRight_du,
-      drawAreaHeight_du + 3
-    );
+    const { displayHeight_du, displayWidth_du } = this.dm.values;
+    // these coordinates will clear everything including the border
+    const args = [0, 0, displayWidth_du, displayHeight_du] as const;
+    this.drawingTools.clearRect_du(...args);
   }
+
   makeRoot(container: HTMLDivElement, idExtension?: string) {
     const root = document.createElement('div');
     root.setAttribute('id', `__PTRwindow_root_element-${idExtension}`);
@@ -96,6 +141,7 @@ export class PTR {
     container.appendChild(root);
     return root;
   }
+
   makeCanvas(container: HTMLDivElement) {
     const canvas = document.createElement('canvas');
     canvas.setAttribute('id', '__PTRwindow_canvas_element');
@@ -103,7 +149,9 @@ export class PTR {
     container.appendChild(canvas);
     return canvas;
   }
+
   drawCellOutlines() {
+    if (!this.displayOptions.drawCellOutlines) return;
     this.ctx.lineWidth = 1;
     this.ctx.strokeStyle = rgbToString([0, 100, 220]);
     const {
@@ -127,6 +175,7 @@ export class PTR {
       }
     }
   }
+
   drawBorder() {
     const {
       borderColor,
@@ -143,6 +192,18 @@ export class PTR {
       displayWidth_du - borderWidth_du,
       displayHeight_du - borderWidth_du
     );
+  }
+
+  run() {
+    let lastTime = 0;
+    const animate = (timeStamp: number) => {
+      const deltaTime = timeStamp - lastTime;
+      lastTime = timeStamp;
+      this.update(deltaTime);
+      this.draw(deltaTime);
+      requestAnimationFrame(animate);
+    };
+    animate(0);
   }
 }
 

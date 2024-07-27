@@ -1,18 +1,19 @@
-import { compose } from "../utils";
+import { SimpleLayoutObject } from '../layout/layoutByCharacter';
+import { compose } from '../utils';
 
 export function applyOutline(
   def: number[],
   charWidth: number,
-  type: "start" | "middle" | "end" | null
+  type: 'start' | 'middle' | 'end' | null
 ): number[] {
   switch (type) {
-    case "start":
+    case 'start':
       return outlineStart(def, charWidth);
 
-    case "middle":
+    case 'middle':
       return outlineMiddle(def, charWidth);
 
-    case "end":
+    case 'end':
       return outlineEnd(def, charWidth);
 
     default:
@@ -115,4 +116,23 @@ function getEdgePoints(
   }
 
   return result;
+}
+
+export function determineOutline(
+  layoutList: SimpleLayoutObject[],
+  i: number
+): 'start' | 'middle' | 'end' | null {
+  const prev = layoutList[i - 1];
+  const next = layoutList[i + 1];
+
+  if (!prev?.attributes?.outline) {
+    return 'start';
+  }
+  if (prev?.attributes?.outline && next?.attributes?.outline) {
+    return 'middle';
+  }
+  if (!next?.attributes?.outline) {
+    return 'end';
+  }
+  return null;
 }

@@ -1,116 +1,71 @@
-import { runPTR } from './lib/PTR';
+import { generateRandomColors } from './lib/utils';
 import { PTR } from './main';
 
 const borgText = `
-<span>
-  <span outline=true>
-    Resistance is futile
+<span color=rgb(10,100,255)>  
+  <span highlight=true >
+    Resistance <span highlight=false outline=rgb(10,10,230)>is</span> futile
   </span>
-  <p highlight=true>
-    Resistance is futile
-  </p>
   <p>We are the Borg. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
 </span>
 `;
 
+const shortText = `<span color=rgb(10,100,255)>hi</span>`;
+
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 5,
-  displayRows: 4,
+  displayRows: 3,
   documentSource: borgText,
+  borderWidth_du: 0,
+  borderColor: [0, 0, 0],
 });
 
-runPTR(ptr);
+ptr.run();
 
-// import { createPTR } from "./lib/createPTR";
-// import { neuromancerText } from "./sampleText/neuromancer";
+declare global {
+  interface Window {
+    _ptr: PTR;
+  }
+}
 
-// const PTR = createPTR(document.getElementById("root") as HTMLDivElement, {
-//   scale: 2,
-// });
+window._ptr = ptr;
 
-// declare global {
-//   interface Window {
-//     _PTR: typeof PTR;
-//   }
-// }
+const getPromptText = () => {
+  return `<span color=${generateRandomColors()} highlight=true></span>`;
+};
 
-// window._PTR = PTR;
+const buttons = [
+  {
+    id: 'appendToDocument',
+    text: 'Append to document',
+    onClick: () => {
+      const text = prompt('Append to Document', getPromptText()) ?? '';
+      ptr.appendToDocument(text);
+    },
+  },
+  {
+    id: 'setDocument',
+    text: 'Set Document',
+    onClick: () => {
+      const text = prompt('Set Document', getPromptText()) ?? '';
+      ptr.setDocument(text);
+    },
+  },
+  {
+    id: 'reset',
+    text: 'Reset Example',
+    onClick: () => {
+      ptr.setDocument(borgText);
+    },
+  },
+];
 
-// const borgText = `
-// <span>
-//   <span outline=true>
-//     Resistance is futile
-//   </span>
-//   <p highlight=true>
-//     Resistance is futile
-//   </p>
-//   <p>We are the Borg. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
-// </span>
-// `;
+const renderInto = document.getElementById('devHarnessButtons');
 
-// PTR.actions.setText(borgText);
-
-// const buttons = [
-//   {
-//     id: "pageUp",
-//     text: "page up",
-//     onClick: () => {
-//       window._PTR.actions.pageUp();
-//     },
-//   },
-//   {
-//     id: "pageDown",
-//     text: "page down",
-//     onClick: () => {
-//       window._PTR.actions.pageDown();
-//     },
-//   },
-//   {
-//     id: "home",
-//     text: "home",
-//     onClick: () => {
-//       window._PTR.actions.home();
-//     },
-//   },
-//   {
-//     id: "end",
-//     text: "end",
-//     onClick: () => {
-//       window._PTR.actions.end();
-//     },
-//   },
-
-//   {
-//     id: "setText",
-//     text: "set text",
-//     onClick: () => {
-//       const text = prompt("Define display text");
-//       window._PTR.actions.setText(text ?? "");
-//     },
-//   },
-//   {
-//     id: "resetText",
-//     text: "EXAMPLE",
-//     onClick: () => {
-//       window._PTR.actions.setText(neuromancerText);
-//     },
-//   },
-//   {
-//     id: "appendText",
-//     text: "append text",
-//     onClick: () => {
-//       const text = prompt("Append Text");
-//       window._PTR.actions.appendText(text ?? "");
-//     },
-//   },
-// ];
-
-// const renderInto = document.getElementById("devHarnessButtons");
-
-// buttons.forEach(b => {
-//   const button = document.createElement("button");
-//   button.id = b.id;
-//   button.innerText = b.text;
-//   button.onclick = b.onClick;
-//   renderInto?.appendChild(button);
-// });
+buttons.forEach((b) => {
+  const button = document.createElement('button');
+  button.id = b.id;
+  button.innerText = b.text;
+  button.onclick = b.onClick;
+  renderInto?.appendChild(button);
+});

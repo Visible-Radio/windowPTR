@@ -9,6 +9,7 @@ export const displayConfigOptionsDefault = {
   borderColor: [200, 0, 120] as rgb8Bit,
   borderWidth_du: 0,
   borderGutter_du: 5,
+  drawCellOutlines: false,
 };
 
 export type DisplayConfigOptions = typeof displayConfigOptionsDefault;
@@ -78,9 +79,6 @@ export default function calculateDisplayMetrics(
 
   const drawAreaHeight_du = drawAreaBottom_du - drawAreaTop_du;
 
-  // could also add lastColumnXCoord_du
-  // or even an array of all column xCoords
-
   const displayMetrics: TDisplayMetrics = {
     displayWidth_px,
     displayHeight_px,
@@ -105,31 +103,6 @@ export default function calculateDisplayMetrics(
     drawAreaHeight_du,
     cellWidth_du,
     cellHeight_du,
-    // getColumnXCoord_du(columnNo) {
-    //   return (
-    //     columnNo * cellWidth_du + gridSpaceX_du * columnNo + drawAreaLeft_du
-    //   );
-    // },
-    // getColumnFromXCoord_du(xCoord) {
-    //   let col = 0;
-    //   let seek = 0;
-    //   while (seek !== xCoord - drawAreaLeft_du) {
-    //     seek += cellWidth_du + gridSpaceX_du;
-    //     col += 1;
-    //   }
-    //   return col;
-    // },
-    // getRemainingRowSpace_du(xCoord) {
-    //   return displayWidth_du - xCoord - drawAreaLeft_du;
-    // },
-    // measureText(text) {
-    //   return text.length * cellWidth_du + (text.length - 1) * gridSpaceX_du;
-    // },
-    // textFits(text, xCoord) {
-    //   // word.length * dm.cellWidth_du + (word.length - 1) * dm.gridSpaceX_du >
-    //   // dm.getRemainingRowSpace_du(cursorX_du)
-    //   return this.measureText(text) <= this.getRemainingRowSpace_du(xCoord);
-    // },
   };
 
   return displayMetrics;
