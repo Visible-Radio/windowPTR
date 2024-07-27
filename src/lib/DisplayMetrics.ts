@@ -76,12 +76,9 @@ export class DisplayMetrics {
     const remainingWidthXPx =
       this.root.clientWidth - totalBorderWidth_du * scale;
 
-    const displayColumns = calcColumns(
-      remainingWidthXPx,
-      scale,
-      this.charWidth,
-      gridSpaceX_du
-    );
+    const displayColumns =
+      this.options.displayColumns ??
+      calcColumns(remainingWidthXPx, scale, this.charWidth, gridSpaceX_du);
 
     const displayUnitsPerRow_du = this.charWidth + gridSpaceY_du;
 

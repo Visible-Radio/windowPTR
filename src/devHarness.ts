@@ -10,11 +10,10 @@ const borgText = `
 </span>
 `;
 
-const shortText = `<span color=rgb(10,100,255)>hi</span>`;
-
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 5,
-  displayRows: 3,
+  displayRows: 10,
+  // displayColumns: 1,
   documentSource: borgText,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
