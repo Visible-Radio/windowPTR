@@ -3,20 +3,22 @@ import { PTR } from './main';
 
 const borgText = `
 <span color=rgb(10,100,255)>  
-  <span highlight=true >
-    Resistance <span highlight=false outline=rgb(10,10,230)>is</span> futile
+  <span highlight=true>
+    Resistance <span highlight=false outline=true>is</span> futile
   </span>
   <p>We are the Borg. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
 </span>
 `;
 
+const short = '<span color=rgb(10,100,255)>hello</span>';
+
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
-  scale: 5,
-  displayRows: 10,
-  // displayColumns: 1,
-  documentSource: borgText,
+  scale: 4,
+  displayRows: 8,
+  documentSource: short,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
+  gridSpaceX_du: 0,
 });
 
 ptr.run();

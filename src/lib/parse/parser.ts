@@ -192,7 +192,8 @@ export function parseTag(text: string): [string, AttributeMap] {
 
       if (
         (attributeName === 'color' && typeof attributeValue === 'string') ||
-        (attributeName === 'outline' && typeof attributeValue === 'string')
+        (attributeName === 'outline' &&
+          typeof coerceStringsToTypes(attributeValue) === 'string')
       ) {
         /* convert this to rgb8Bit */
         /* `rgb(100,200,43)` */
