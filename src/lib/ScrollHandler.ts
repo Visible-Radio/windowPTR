@@ -17,13 +17,18 @@ export class ScrollHandler {
       this.ptr.dm.values.cellHeight_du -
       this.ptr.dm.values.gridSpaceY_du;
 
-    if (this.ptr.letters.currentLetter?.position.y > scrollThreshold) {
+    const i = this.ptr.letters.list.findIndex(
+      (letter) => !letter.states.FIRST_DRAW.done
+    );
+    const currentLetter = this.ptr.letters.list[i];
+
+    if (currentLetter?.position.y > scrollThreshold) {
       this.ptr.letters.pause();
       this.scroll(deltaTime);
     }
     if (
       this.ptr.letters.pauseUpdates &&
-      this.ptr.letters.currentLetter?.position.y <= scrollThreshold
+      currentLetter?.position.y <= scrollThreshold
     ) {
       this.ptr.letters.unPause();
     }

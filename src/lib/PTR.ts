@@ -107,6 +107,7 @@ export class PTR {
   }
 
   update(deltaTime: number) {
+    /* we can pass delta time to update - but we may not use it there */
     this.letters.update(deltaTime);
     this.scrollHandler.update(deltaTime);
   }
@@ -115,7 +116,8 @@ export class PTR {
     this.clearDrawArea();
 
     const letterPixels = this.letters.list
-      .map((letter) => letter.getFrame())
+      /* we'll now pass deltaTime directly to the letter's getFrame method */
+      .map((letter) => letter.getFrame(deltaTime))
       .flat();
 
     letterPixels.forEach((pixel) => {

@@ -14,8 +14,9 @@ const short = '<span color=rgb(10,100,255)>hello</span>';
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 4,
-  displayRows: 8,
-  documentSource: short,
+  displayRows: 3,
+  displayColumns: 12,
+  documentSource: borgText,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
   gridSpaceX_du: 0,

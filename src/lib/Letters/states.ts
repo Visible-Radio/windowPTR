@@ -3,6 +3,18 @@ import { rgb8Bit } from '../../utils/typeUtils/intRange';
 import { applyOutline, determineOutline } from '../draw/outlineChar';
 import { Letter, Pixel } from './Letters';
 
+export type States = {
+  HIDDEN: Hidden;
+  FIRST_DRAW: FirstDraw;
+  IDLE: Idle;
+  GLITCHING: Glitching;
+  BLINKING: Blinking;
+};
+
+export interface LetterState {
+  getFrame: (deltaTime: number) => Pixel[];
+}
+
 class BaseLetterState {
   letter: Letter;
   color: rgb8Bit;
@@ -27,6 +39,8 @@ class BaseLetterState {
     );
   }
 
+  /** Note that _this_ getFrame() method expects the target width for transforming points,
+   * whereass the subclasses expect deltaTime */
   getFrame(targetWidth: number): Pixel[] {
     const basePixels = this.transformPoints(
       targetWidth,
@@ -72,7 +86,7 @@ class BaseLetterState {
   }
 }
 
-export class Hidden extends BaseLetterState {
+export class Hidden extends BaseLetterState implements LetterState {
   letter: Letter;
   constructor(letter: Letter) {
     super(letter);
@@ -89,11 +103,11 @@ export class Hidden extends BaseLetterState {
   }
 }
 
-export class FirstDraw extends BaseLetterState {
+export class FirstDraw extends BaseLetterState implements LetterState {
   letter: Letter;
   frameTimer: number;
   frameCounter: number;
-  fps = 120;
+  fps = 60;
   frameInterval = 1000 / this.fps;
   done = false;
   totalFrames: number;
@@ -112,9 +126,6 @@ export class FirstDraw extends BaseLetterState {
   getFrame(deltaTime: number): Pixel[] {
     if (this.frameTimer > this.frameInterval) {
       this.frameTimer = 0;
-      /* here we'd want to advance the frame counter if frames remain in the animation */
-      /* else if the animation is supposed to loop, reset the frame counter to 0 */
-      /* else if the animation is suposed to freeze at the end, leave the frame counter where it is */
       if (!this.done) {
         this.frameCounter++;
       }
@@ -130,9 +141,10 @@ export class FirstDraw extends BaseLetterState {
   }
 }
 
-export class Idle extends BaseLetterState {
+export class Idle extends BaseLetterState implements LetterState {
   letter: Letter;
   totalFrames: number;
+
   constructor(letter: Letter) {
     super(letter);
     this.letter = letter;
@@ -149,23 +161,62 @@ export class Idle extends BaseLetterState {
   }
 }
 
-export class Glitching extends BaseLetterState {
+export class Glitching extends BaseLetterState implements LetterState {
   letter: Letter;
+  done: boolean;
+  frameTimer: number;
+  frameCounter: number;
+  fps = 60;
+  frameInterval = 1000 / this.fps;
+  totalFrames: number;
+
   constructor(letter: Letter) {
     super(letter);
     this.letter = letter;
+    this.done = false;
+    this.frameTimer = 0;
+    this.frameCounter = 0;
+    this.totalFrames = 4;
   }
 
   enter() {
     /*  */
+    this.reset();
+    this.letter.currentState = this.letter.states.GLITCHING;
+  }
+
+  reset() {
+    this.done = false;
+    this.frameCounter = 0;
+    this.frameTimer = 0;
   }
 
   getFrame(deltaTime: number): Pixel[] {
-    return [];
+    if (this.frameTimer > this.frameInterval) {
+      this.frameTimer = 0;
+      if (!this.done) {
+        this.frameCounter++;
+      }
+    } else {
+      this.frameTimer += deltaTime;
+    }
+
+    if (this.frameCounter >= this.totalFrames) {
+      this.done = true;
+    }
+
+    return super
+      .getFrame(this.letter.charWidth - 1 - this.frameCounter)
+      .map((px) => {
+        return {
+          ...px,
+          color: [200, 0, 0],
+        };
+      });
   }
 }
 
-export class Blinking extends BaseLetterState {
+export class Blinking extends BaseLetterState implements LetterState {
   letter: Letter;
   constructor(letter: Letter) {
     super(letter);
