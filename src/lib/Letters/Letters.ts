@@ -1,8 +1,8 @@
-import { gridPositionFromIndex } from '../utils/gridPositionFromIndex';
-import { rgb8Bit } from '../utils/typeUtils/intRange';
-import { PTR } from './PTR';
-import { applyOutline, determineOutline } from './draw/outlineChar';
-import { AttributeMap } from './parse/parser';
+import { gridPositionFromIndex } from '../../utils/gridPositionFromIndex';
+import { rgb8Bit } from '../../utils/typeUtils/intRange';
+import { PTR } from '../PTR';
+import { applyOutline, determineOutline } from '../draw/outlineChar';
+import { AttributeMap } from '../parse/parser';
 
 export class Letters {
   list: Letter[];
@@ -85,7 +85,7 @@ export class Letters {
   }
 }
 
-type Pixel = { x: number; y: number; color: rgb8Bit };
+export type Pixel = { x: number; y: number; color: rgb8Bit };
 
 export class Letter {
   ptr: PTR;
@@ -95,8 +95,8 @@ export class Letter {
   def: number[];
   fps = 120;
   frameInterval = 1000 / this.fps; // how long should a frame last
-  frameTimer = 0;
-  frameCounter = 0;
+  frameTimer: number;
+  frameCounter: number;
   initialAnimationComplete = false;
   pixels: Pixel[] = [];
   animations: LetterAnimation[];
@@ -128,8 +128,22 @@ export class Letter {
       char.toUpperCase() as keyof typeof ptr.defs
     ] as number[];
     this.def = this.attributes.highlight ? this.invertDef(baseDef) : baseDef;
-    this.frameTimer = 0;
+
+    /* we should model these as _states_ rather than animations
+    each state will have an enter() method that puts the Letter into that state
+    and a getFrame() method that will be called on each update cycle    
+    
+    Hidden - 
+    FirstDraw -
+    Idle -
+    Blinking -
+    Glitching -
+    */
     this.animations = [new LetterAnimation(this, { isLoop: false })];
+
+    /* We may want to handle details like frameTimer / frameCounter in the state objects themselves */
+    this.frameTimer = 0;
+    this.frameCounter = 0;
     this.animationIndex = 0;
     this.currentAnimation = this.animations[this.animationIndex];
   }
@@ -140,6 +154,10 @@ export class Letter {
       if (!def.includes(i)) full.push(i);
     }
     return full;
+  }
+
+  getFrame(): Pixel[] {
+    return this.currentAnimation.getFrame(this.frameCounter);
   }
 
   update(deltaTime: number) {
@@ -157,9 +175,6 @@ export class Letter {
     } else {
       this.frameTimer += deltaTime;
     }
-  }
-  getFrame(): Pixel[] {
-    return this.currentAnimation.getFrame(this.frameCounter);
   }
 }
 

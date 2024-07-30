@@ -3,7 +3,7 @@ import { rgbToString } from '../utils/rgbToString';
 import { rgb8Bit } from '../utils/typeUtils/intRange';
 import { DisplayMetrics } from './DisplayMetrics';
 import { Layout } from './Layout';
-import { Letters } from './actors';
+import { Letters } from './Letters/Letters';
 import { ScrollHandler } from './ScrollHandler';
 import { DisplayConfigOptions } from './calculateDisplayMetrics';
 import configureCanvas from './configureCanvas';
