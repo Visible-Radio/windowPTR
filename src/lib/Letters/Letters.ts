@@ -141,7 +141,7 @@ export class Letter {
       !this.states.FIRST_DRAW.done
     ) {
       this.currentState = this.states.FIRST_DRAW;
-    } else if (this.currentState instanceof Idle && Math.random() > 0.9991) {
+    } else if (this.currentState instanceof Idle && Math.random() > 0.9993) {
       this.states.GLITCHING.enter();
     } else if (
       this.currentState instanceof Glitching &&

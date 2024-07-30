@@ -189,6 +189,7 @@ export class Glitching extends BaseLetterState implements LetterState {
     this.done = false;
     this.frameCounter = 0;
     this.frameTimer = 0;
+    this.totalFrames = Math.floor(Math.random() * 10);
   }
 
   getFrame(deltaTime: number): Pixel[] {
