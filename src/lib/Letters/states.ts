@@ -3,11 +3,6 @@ import { rgb8Bit } from '../../utils/typeUtils/intRange';
 import { applyOutline, determineOutline } from '../draw/outlineChar';
 import { Letter, Pixel } from './Letters';
 
-interface LetterState {
-  getFrame: () => Pixel[];
-  enter: () => void;
-}
-
 class BaseLetterState {
   letter: Letter;
   color: rgb8Bit;
@@ -32,9 +27,9 @@ class BaseLetterState {
     );
   }
 
-  getFrame(frameIndex: number): Pixel[] {
-    const basePixels = this.applyTransform(
-      frameIndex,
+  getFrame(targetWidth: number): Pixel[] {
+    const basePixels = this.transformPoints(
+      targetWidth,
       this.letter.def,
       this.color
     );
@@ -46,8 +41,8 @@ class BaseLetterState {
         ? this.letter.attributes.outline
         : this.color;
 
-      outlinePixels = this.applyTransform(
-        frameIndex,
+      outlinePixels = this.transformPoints(
+        targetWidth,
         this.outline1dPoints,
         outlineColor
       );
@@ -56,16 +51,16 @@ class BaseLetterState {
     return basePixels.concat(outlinePixels);
   }
 
-  applyTransform(frameIndex: number, points: number[], color: rgb8Bit) {
+  transformPoints(targetWidth: number, points: number[], color: rgb8Bit) {
     const newPoints = points.map((oneDimensionalPoint) => {
       const { x, y } = gridPositionFromIndex({
         index: oneDimensionalPoint,
-        columns: frameIndex + 1,
+        columns: targetWidth + 1,
       });
 
       const positionMod =
         Math.random() > 0.95 ? Math.random() * getSign() * 2 : 0;
-      const mapped = frameIndex / this.totalFrames;
+      const mapped = targetWidth / this.totalFrames;
 
       return {
         x: x + this.letter.position.x + positionMod,
@@ -77,9 +72,10 @@ class BaseLetterState {
   }
 }
 
-export class Hidden implements LetterState {
+export class Hidden extends BaseLetterState {
   letter: Letter;
   constructor(letter: Letter) {
+    super(letter);
     this.letter = letter;
   }
 
@@ -88,8 +84,49 @@ export class Hidden implements LetterState {
   }
 
   /** Returns an empty pixel array */
-  getFrame(): Pixel[] {
+  getFrame(deltaTime: number): Pixel[] {
     return [];
+  }
+}
+
+export class FirstDraw extends BaseLetterState {
+  letter: Letter;
+  frameTimer: number;
+  frameCounter: number;
+  fps = 120;
+  frameInterval = 1000 / this.fps;
+  done = false;
+  totalFrames: number;
+  constructor(letter: Letter) {
+    super(letter);
+    this.letter = letter;
+    this.frameTimer = 0;
+    this.frameCounter = 0;
+    this.totalFrames = this.letter.charWidth - 1;
+  }
+
+  enter() {
+    /*  */
+  }
+
+  getFrame(deltaTime: number): Pixel[] {
+    if (this.frameTimer > this.frameInterval) {
+      this.frameTimer = 0;
+      /* here we'd want to advance the frame counter if frames remain in the animation */
+      /* else if the animation is supposed to loop, reset the frame counter to 0 */
+      /* else if the animation is suposed to freeze at the end, leave the frame counter where it is */
+      if (!this.done) {
+        this.frameCounter++;
+      }
+    } else {
+      this.frameTimer += deltaTime;
+    }
+
+    if (this.frameCounter >= this.totalFrames) {
+      this.done = true;
+    }
+
+    return super.getFrame(this.frameCounter);
   }
 }
 
@@ -107,14 +144,15 @@ export class Idle extends BaseLetterState {
   }
 
   /** Returns the letter in it's 'defined' state according to the definition */
-  getFrame() {
-    return super.getFrame(this.totalFrames);
+  getFrame(deltaTime: number): Pixel[] {
+    return super.getFrame(this.letter.charWidth - 1);
   }
 }
 
-export class Glitching implements LetterState {
+export class Glitching extends BaseLetterState {
   letter: Letter;
   constructor(letter: Letter) {
+    super(letter);
     this.letter = letter;
   }
 
@@ -122,14 +160,15 @@ export class Glitching implements LetterState {
     /*  */
   }
 
-  getFrame() {
+  getFrame(deltaTime: number): Pixel[] {
     return [];
   }
 }
 
-export class Blinking implements LetterState {
+export class Blinking extends BaseLetterState {
   letter: Letter;
   constructor(letter: Letter) {
+    super(letter);
     this.letter = letter;
   }
 
@@ -137,7 +176,7 @@ export class Blinking implements LetterState {
     /*  */
   }
 
-  getFrame() {
+  getFrame(deltaTime: number): Pixel[] {
     return [];
   }
 }
