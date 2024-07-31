@@ -224,33 +224,20 @@ export class Blinking extends BaseLetterState implements LetterState {
   frameCounter: number;
   fps = 15;
   frameInterval = 1000 / this.fps;
-  frames: Pixel[][];
   totalFrames: number;
+
+  frameBrightnessModifiers = [0, 0, 0, 0.5, 2, 1, 0.5, 0];
   constructor(letter: Letter) {
     super(letter);
     this.letter = letter;
     this.frameTimer = 0;
     this.frameCounter = 0;
-    this.frames = this.createFrames();
-    this.totalFrames = this.frames.length;
+
+    this.totalFrames = this.frameBrightnessModifiers.length;
   }
 
   enter() {
     this.letter.currentState = this.letter.states.BLINKING;
-  }
-
-  createFrames(): Pixel[][] {
-    const base = super.getFrame(this.letter.charWidth - 1);
-    const half = base.map((px) => ({
-      ...px,
-      color: scaleColor(px.color, 0.5),
-    }));
-
-    const double = base.map((px) => ({
-      ...px,
-      color: scaleColor(px.color, 2),
-    }));
-    return [[], [], [], half, base, double, base, half, []];
   }
 
   getFrame(deltaTime: number): Pixel[] {
@@ -264,7 +251,15 @@ export class Blinking extends BaseLetterState implements LetterState {
     } else {
       this.frameTimer += deltaTime;
     }
-    const pick = this.frames[this.frameCounter];
+
+    const pick = super.getFrame(this.letter.charWidth - 1).map((px) => ({
+      ...px,
+      color: scaleColor(
+        px.color,
+        this.frameBrightnessModifiers[this.frameCounter]
+      ),
+    }));
+
     return pick;
   }
 }

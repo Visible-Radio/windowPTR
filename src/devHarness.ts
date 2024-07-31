@@ -11,7 +11,7 @@ const borgText = `
 `;
 
 const short =
-  '<span color=rgb(10,100,255)>no blink<span highlight=true blink=true>blink</span>Also no blinky</span>';
+  '<span color=rgb(10,100,255)>no blink<span highlight=true blink=true>blink blink</span>Also no blinky</span>';
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 4,
