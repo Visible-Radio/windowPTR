@@ -71,7 +71,6 @@ export class PTR {
     this.scrollHandler = new ScrollHandler(this);
 
     console.log(printTree(this.documentTree));
-    new Letters(this);
 
     window.addEventListener('resize', () => this.onWindowResize(this));
   }

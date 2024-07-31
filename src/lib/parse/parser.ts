@@ -5,9 +5,10 @@ export type AttributeMap = {
   highlight?: boolean;
   color?: rgb8Bit | null;
   outline?: boolean | rgb8Bit;
+  blink?: boolean;
 };
 
-const AttributeNamesArr = ['highlight', 'color', 'outline'] as const;
+const AttributeNamesArr = ['highlight', 'color', 'outline', 'blink'] as const;
 
 export class Text {
   protected __text: string;

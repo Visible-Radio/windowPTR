@@ -1,3 +1,4 @@
+import { create } from 'domain';
 import { gridPositionFromIndex } from '../../utils/gridPositionFromIndex';
 import { rgb8Bit } from '../../utils/typeUtils/intRange';
 import { applyOutline, determineOutline } from '../draw/outlineChar';
@@ -219,22 +220,70 @@ export class Glitching extends BaseLetterState implements LetterState {
 
 export class Blinking extends BaseLetterState implements LetterState {
   letter: Letter;
+  frameTimer: number;
+  frameCounter: number;
+  fps = 15;
+  frameInterval = 1000 / this.fps;
+  frames: Pixel[][];
+  totalFrames: number;
   constructor(letter: Letter) {
     super(letter);
     this.letter = letter;
+    this.frameTimer = 0;
+    this.frameCounter = 0;
+    this.frames = this.createFrames();
+    this.totalFrames = this.frames.length;
   }
 
   enter() {
-    /*  */
+    this.letter.currentState = this.letter.states.BLINKING;
+  }
+
+  createFrames(): Pixel[][] {
+    const base = super.getFrame(this.letter.charWidth - 1);
+    const half = base.map((px) => ({
+      ...px,
+      color: scaleColor(px.color, 0.5),
+    }));
+
+    const double = base.map((px) => ({
+      ...px,
+      color: scaleColor(px.color, 2),
+    }));
+    return [[], [], [], half, base, double, base, half, []];
   }
 
   getFrame(deltaTime: number): Pixel[] {
-    return [];
+    if (this.frameTimer > this.frameInterval) {
+      this.frameTimer = 0;
+      if (this.frameCounter < this.totalFrames - 1) {
+        this.frameCounter++;
+      } else {
+        this.frameCounter = 0;
+      }
+    } else {
+      this.frameTimer += deltaTime;
+    }
+    const pick = this.frames[this.frameCounter];
+    return pick;
   }
 }
 
 export function getSign() {
   return Math.random() > 0.5 ? -1 : 1;
+}
+
+function scaleColor(color: rgb8Bit, factor: number): rgb8Bit {
+  return color.map((channel) => {
+    const result = Math.floor(channel * factor);
+    if (result > 255) {
+      return 255;
+    } else if (result < 0) {
+      return 0;
+    } else {
+      return result;
+    }
+  }) as rgb8Bit;
 }
 
 function modColor(color: rgb8Bit, factor: number) {

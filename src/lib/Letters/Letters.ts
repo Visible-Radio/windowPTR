@@ -1,12 +1,38 @@
 import { rgb8Bit } from '../../utils/typeUtils/intRange';
 import { PTR } from '../PTR';
-import { AttributeMap } from '../parse/parser';
+import { AttributeMap, Text } from '../parse/parser';
 import { Blinking, FirstDraw, Glitching, Hidden, Idle, States } from './states';
+
+type NodeMapData = {
+  letters: Letter[];
+};
+
+class NodeMeta {
+  private map: WeakMap<Text, NodeMapData>;
+  constructor() {
+    this.map = new WeakMap();
+  }
+  addLetter(node: Text, letter: Letter) {
+    if (this.map.has(node)) {
+      const existing = this.map.get(node)!.letters;
+
+      existing.push(letter);
+    } else {
+      this.map.set(node, { letters: [letter] });
+    }
+  }
+  getAllLettersForTextNode(node: Text) {
+    return this.map.get(node)?.letters;
+  }
+}
+
+const nodeMeta = new NodeMeta();
 
 export class Letters {
   list: Letter[];
   ptr: PTR;
   pauseUpdates: boolean;
+  nodeMeta = nodeMeta;
   constructor(ptr: PTR) {
     this.ptr = ptr;
     let prev: null | Letter = null;
@@ -18,14 +44,19 @@ export class Letters {
         attributes: layoutObject?.attributes ?? {},
         letterIndex: i,
         previousLetter: prev,
+        node: layoutObject.node!,
       });
       prev = letter;
+      console.log('adding', letter.char);
+      this.nodeMeta.addLetter(layoutObject.node!, letter);
+
       return letter;
     });
     this.pauseUpdates = false;
   }
 
   addLetters() {
+    console.log('add letters method called');
     const lastLetterIndex = this.list.length - 1;
     const newLayoutObjects = this.ptr.layout.layoutList.slice(this.list.length);
     let prev: null | Letter = null;
@@ -40,8 +71,10 @@ export class Letters {
         attributes: layoutObject?.attributes ?? {},
         letterIndex: i + 1 + lastLetterIndex,
         previousLetter: prev,
+        node: layoutObject.node!,
       });
       prev = letter;
+      // this.nodeMeta.addLetter(layoutObject.node!, letter);
       return letter;
     });
     newLetters.forEach((letter) => this.list.push(letter));
@@ -85,6 +118,7 @@ export class Letter {
   previousLetter: Letter | null;
   attributes: AttributeMap;
   letterIndex: number;
+  node: Text;
 
   constructor({
     position,
@@ -93,6 +127,7 @@ export class Letter {
     attributes,
     letterIndex,
     previousLetter,
+    node,
   }: {
     ptr: PTR;
     position: { x: number; y: number };
@@ -100,6 +135,7 @@ export class Letter {
     attributes: AttributeMap;
     letterIndex: number;
     previousLetter: Letter | null;
+    node: Text;
   }) {
     this.ptr = ptr;
     this.previousLetter = previousLetter;
@@ -108,6 +144,7 @@ export class Letter {
     this.char = char;
     this.charWidth = this.ptr.defs.charWidth;
     this.attributes = attributes;
+    this.node = node;
     const baseDef = ptr.defs[
       char.toUpperCase() as keyof typeof ptr.defs
     ] as number[];
@@ -148,6 +185,18 @@ export class Letter {
       this.currentState.done
     ) {
       this.currentState = this.states.IDLE;
+    } else if (this.currentState instanceof Idle && this.attributes.blink) {
+      /* letters that should blink with this letter */
+      const blinkingLetters = nodeMeta.getAllLettersForTextNode(this.node);
+      /* check if all are ready to blink */
+      const readyForBlink = blinkingLetters?.every(
+        (letter) => letter.states.FIRST_DRAW.done
+      );
+      if (readyForBlink) {
+        blinkingLetters?.forEach((letter) => {
+          letter.states.BLINKING.enter();
+        });
+      }
     }
   }
 

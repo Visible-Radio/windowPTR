@@ -10,13 +10,14 @@ const borgText = `
 </span>
 `;
 
-const short = '<span color=rgb(10,100,255)>hello</span>';
+const short =
+  '<span color=rgb(10,100,255)>no blink<span highlight=true blink=true>blink</span>Also no blinky</span>';
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 4,
   displayRows: 3,
   displayColumns: 12,
-  documentSource: borgText,
+  documentSource: short,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
   gridSpaceX_du: 0,
