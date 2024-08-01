@@ -74,7 +74,7 @@ export class Letters {
         node: layoutObject.node!,
       });
       prev = letter;
-      // this.nodeMeta.addLetter(layoutObject.node!, letter);
+      this.nodeMeta.addLetter(layoutObject.node!, letter);
       return letter;
     });
     newLetters.forEach((letter) => this.list.push(letter));
