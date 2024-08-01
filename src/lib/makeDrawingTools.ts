@@ -1,28 +1,5 @@
 import makeDu from './makeDu';
 
-/**
- *
- * @returns a memoized version of makeDrawingTools()
- */
-export function useDrawingTools(ctx: CanvasRenderingContext2D) {
-  let lastCtx: CanvasRenderingContext2D | undefined = undefined;
-  let lastScale: number | undefined = undefined;
-  let lastResult: ReturnType<typeof makeDrawingTools> | undefined = undefined;
-
-  return (scale: number) => {
-    if (lastCtx === ctx && lastScale === scale && lastResult) {
-      return lastResult;
-    }
-
-    const result = makeDrawingTools(ctx, scale);
-    lastCtx = ctx;
-    lastScale = scale;
-    lastResult = result;
-
-    return result;
-  };
-}
-
 export default function makeDrawingTools(
   ctx: CanvasRenderingContext2D,
   scale: number
