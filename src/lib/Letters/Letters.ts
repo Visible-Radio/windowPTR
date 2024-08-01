@@ -47,7 +47,6 @@ export class Letters {
         node: layoutObject.node!,
       });
       prev = letter;
-      console.log('adding', letter.char);
       this.nodeMeta.addLetter(layoutObject.node!, letter);
 
       return letter;
@@ -56,7 +55,6 @@ export class Letters {
   }
 
   addLetters() {
-    console.log('add letters method called');
     const lastLetterIndex = this.list.length - 1;
     const newLayoutObjects = this.ptr.layout.layoutList.slice(this.list.length);
     let prev: null | Letter = null;
