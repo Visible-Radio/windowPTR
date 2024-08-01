@@ -1,7 +1,14 @@
 import { traverseReduce } from '../utils/traverseReduce';
 import { PTR } from './PTR';
-import { SimpleLayoutObject } from './layout/layoutByCharacter';
-import { Text } from './parse/parser';
+import { AttributeMap, Text } from './parse/parser';
+
+export interface SimpleLayoutObject {
+  x: number;
+  y: number;
+  char: string;
+  attributes?: AttributeMap;
+  node?: Text;
+}
 
 export class Layout {
   public layoutList: SimpleLayoutObject[] = [];

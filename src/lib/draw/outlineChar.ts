@@ -1,4 +1,4 @@
-import { SimpleLayoutObject } from '../layout/layoutByCharacter';
+import { SimpleLayoutObject } from '../Layout';
 import { compose } from '../utils';
 
 export function applyOutline(

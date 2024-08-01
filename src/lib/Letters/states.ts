@@ -1,4 +1,3 @@
-import { create } from 'domain';
 import { gridPositionFromIndex } from '../../utils/gridPositionFromIndex';
 import { rgb8Bit } from '../../utils/typeUtils/intRange';
 import { applyOutline, determineOutline } from '../draw/outlineChar';

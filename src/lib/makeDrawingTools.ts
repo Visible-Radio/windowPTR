@@ -1,4 +1,9 @@
-import makeDu from './makeDu';
+/**
+ * Takes a scale multiplier and returns a function that will scale it's arguments by that multiplier
+ */
+export function makeDu(scale: number) {
+  return (...args: number[]) => args.map((a) => a * scale);
+}
 
 export default function makeDrawingTools(
   ctx: CanvasRenderingContext2D,

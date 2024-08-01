@@ -6,7 +6,6 @@ import { Layout } from './Layout';
 import { Letters } from './Letters/Letters';
 import { ScrollHandler } from './ScrollHandler';
 import { DisplayConfigOptions } from './calculateDisplayMetrics';
-import configureCanvas from './configureCanvas';
 import customDefs_charWidth_7 from './customDefs_charWidth_7';
 import makeDrawingTools from './makeDrawingTools';
 import { Element, parse, printTree } from './parse/parser';
@@ -62,7 +61,7 @@ export class PTR {
       options: this.displayOptions,
     });
     this.drawingTools = makeDrawingTools(this.ctx, this.dm.values.scale);
-    configureCanvas(this.ctx, this.dm.values);
+    this.configureCanvas();
     this.documentSource = this.displayOptions.documentSource;
     this.documentTree = parse(this.documentSource);
 
@@ -72,12 +71,17 @@ export class PTR {
 
     console.log(printTree(this.documentTree));
 
-    window.addEventListener('resize', () => this.onWindowResize(this));
+    window.addEventListener('resize', () => this.onWindowResize());
   }
 
-  onWindowResize(ptr: PTR) {
+  configureCanvas() {
+    this.ctx.canvas.width = this.dm.values.displayWidth_px;
+    this.ctx.canvas.height = this.dm.values.displayHeight_px;
+  }
+
+  onWindowResize() {
     this.dm.calculateMetrics();
-    configureCanvas(ptr.ctx, this.dm.values);
+    this.configureCanvas();
     this.layout = new Layout(this);
     this.letters.updateLayout();
   }
