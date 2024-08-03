@@ -76,9 +76,23 @@ export class DisplayMetrics {
     const remainingWidthXPx =
       this.root.clientWidth - totalBorderWidth_du * scale;
 
-    const displayColumns =
-      this.options.displayColumns ??
-      calcColumns(remainingWidthXPx, scale, this.charWidth, gridSpaceX_du);
+    /* make displayColumns the MAXIMUM display columns*/
+    const calculatedColumns = calcColumns(
+      remainingWidthXPx,
+      scale,
+      this.charWidth,
+      gridSpaceX_du
+    );
+
+    let displayColumns: number;
+    if (
+      this.options.displayColumns &&
+      this.options.displayColumns < calculatedColumns
+    ) {
+      displayColumns = this.options.displayColumns;
+    } else {
+      displayColumns = calculatedColumns > 0 ? calculatedColumns : 1;
+    }
 
     const displayUnitsPerRow_du = this.charWidth + gridSpaceY_du;
 
@@ -101,6 +115,8 @@ export class DisplayMetrics {
       displayColumns * cellWidth_du +
       numberOfColumnGaps * gridSpaceX_du +
       totalBorderWidth_du;
+
+    console.log({ displayWidth_du, displayColumns });
 
     const displayWidth_px = displayWidth_du * scale;
 

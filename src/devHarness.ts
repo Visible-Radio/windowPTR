@@ -15,15 +15,25 @@ const short =
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
-  displayRows: 10,
-  // displayColumns: 12,
+  displayRows: 5,
+  displayColumns: 1,
   documentSource: borgText,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
   gridSpaceX_du: 0,
-});
+  idExtension: '1',
+}).run();
 
-ptr.run();
+new PTR(document.getElementById('root') as HTMLDivElement, {
+  scale: 3,
+  displayRows: 5,
+  // displayColumns: 10,
+  documentSource: borgText,
+  borderWidth_du: 0,
+  borderColor: [0, 0, 0],
+  gridSpaceX_du: 0,
+  idExtension: '2',
+}).run();
 
 declare global {
   interface Window {

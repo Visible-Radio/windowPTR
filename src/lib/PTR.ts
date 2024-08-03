@@ -35,10 +35,12 @@ export class PTR {
   scrollHandler: ScrollHandler;
   constructor(
     containerElement: HTMLDivElement,
-    options: Partial<DisplayConfigOptions & { documentSource: string }>
+    options: Partial<
+      DisplayConfigOptions & { documentSource: string; idExtension?: string }
+    >
   ) {
     this.defs = modifyDefs(customDefs_charWidth_7);
-    this.rootElement = this.makeRoot(containerElement);
+    this.rootElement = this.makeRoot(containerElement, options.idExtension);
     this.canvasElement = this.makeCanvas(this.rootElement);
     const context = this.canvasElement.getContext('2d');
     if (!context) throw new Error('no canvas 2d context 🤷🏻');
@@ -69,9 +71,11 @@ export class PTR {
     this.letters = new Letters(this);
     this.scrollHandler = new ScrollHandler(this);
 
-    console.log(printTree(this.documentTree));
-
     window.addEventListener('resize', () => this.onWindowResize());
+  }
+
+  printTree() {
+    printTree(this.documentTree);
   }
 
   configureCanvas() {
@@ -80,7 +84,8 @@ export class PTR {
   }
 
   onWindowResize() {
-    this.dm.calculateMetrics();
+    const res = this.dm.calculateMetrics();
+    console.log(res);
     this.configureCanvas();
     this.layout = new Layout(this);
     this.letters.updateLayout();
@@ -97,7 +102,6 @@ export class PTR {
     // not really efficient - we redo the layout, even for things we have already done
     this.layout = new Layout(this);
     this.letters.addLetters();
-    console.log(printTree(this.documentTree));
   }
 
   setDocument(document: string) {
@@ -106,7 +110,6 @@ export class PTR {
     this.layout = new Layout(this);
     this.letters = new Letters(this);
     this.scrollY = 0;
-    console.log(printTree(this.documentTree));
   }
 
   update(deltaTime: number) {
@@ -209,6 +212,7 @@ export class PTR {
       requestAnimationFrame(animate);
     };
     animate(0);
+    return this;
   }
 }
 
