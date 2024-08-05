@@ -143,10 +143,10 @@ export class PTR {
     this.scrollY = 0;
   }
 
-  update(deltaTime: number) {
+  update() {
     /* we can pass delta time to update - but we may not use it there */
-    this.letters.update(deltaTime);
-    this.scrollHandler.update(deltaTime);
+    this.letters.update();
+    this.scrollHandler.update();
   }
 
   draw(deltaTime: number) {
@@ -238,7 +238,7 @@ export class PTR {
     const animate = (timeStamp: number) => {
       const deltaTime = timeStamp - lastTime;
       lastTime = timeStamp;
-      this.update(deltaTime);
+      this.update();
       this.draw(deltaTime);
       requestAnimationFrame(animate);
     };
@@ -253,7 +253,7 @@ export function runPTR(ptr: PTR) {
   function animate(timeStamp: number) {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
-    ptr.update(deltaTime);
+    ptr.update();
     ptr.draw(deltaTime);
     requestAnimationFrame(animate);
   }

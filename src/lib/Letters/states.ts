@@ -98,7 +98,7 @@ export class Hidden extends BaseLetterState implements LetterState {
   }
 
   /** Returns an empty pixel array */
-  getFrame(deltaTime: number): Pixel[] {
+  getFrame(): Pixel[] {
     return [];
   }
 }
@@ -156,7 +156,7 @@ export class Idle extends BaseLetterState implements LetterState {
   }
 
   /** Returns the letter in it's 'defined' state according to the definition */
-  getFrame(deltaTime: number): Pixel[] {
+  getFrame(): Pixel[] {
     return super.getFrame(this.letter.charWidth - 1);
   }
 }

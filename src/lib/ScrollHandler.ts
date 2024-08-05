@@ -10,7 +10,7 @@ export class ScrollHandler {
     this.ptr = ptr;
   }
 
-  update(deltaTime: number) {
+  update() {
     const scrollThreshold =
       this.ptr.scrollY +
       this.ptr.dm.values.displayHeight_du -
@@ -24,7 +24,7 @@ export class ScrollHandler {
 
     if (currentLetter?.position.y > scrollThreshold) {
       this.ptr.letters.pause();
-      this.scroll(deltaTime);
+      this.scroll();
     }
     if (
       this.ptr.letters.pauseUpdates &&
@@ -33,7 +33,7 @@ export class ScrollHandler {
       this.ptr.letters.unPause();
     }
   }
-  scroll(deltaTime: number) {
+  scroll() {
     if (this.frameCounter === 1) {
       this.frameCounter = 0;
       this.ptr.scrollY += 1;

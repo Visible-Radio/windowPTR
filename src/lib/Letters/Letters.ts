@@ -94,10 +94,10 @@ export class Letters {
     });
   }
 
-  update(deltaTime: number) {
+  update() {
     if (this.pauseUpdates) return;
     this.list.forEach((letter) => {
-      letter.update(deltaTime);
+      letter.update();
     });
   }
 }
@@ -167,7 +167,7 @@ export class Letter {
     return full;
   }
 
-  update(deltaTime: number) {
+  update() {
     if (this.currentState instanceof FirstDraw && this.currentState.done) {
       this.currentState = this.states.IDLE;
     } else if (

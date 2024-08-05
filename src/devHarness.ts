@@ -1,4 +1,3 @@
-import { generateRandomColors } from './lib/utils';
 import { PTR } from './main';
 import { rgbToString } from './utils/rgbToString';
 
@@ -12,9 +11,6 @@ const borgText = `
   <p>We are the <span blink=true>B</span><span blink=true>O</span><span blink=true>R</span><span blink=true>G</span>. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
 </span>
 `;
-
-const short =
-  '<span color=rgb(10,100,255)>no blink<span highlight=true blink=true>blink blink</span>Also no blinky</span>';
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
@@ -35,7 +31,7 @@ declare global {
 window._ptr = ptr;
 
 const getPromptText = () => {
-  return `<span color=${generateRandomColors()} highlight=true></span>`;
+  return `<span color=${color} highlight=true></span>`;
 };
 
 const buttons = [
