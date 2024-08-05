@@ -1,8 +1,11 @@
 import { generateRandomColors } from './lib/utils';
 import { PTR } from './main';
+import { rgbToString } from './utils/rgbToString';
+
+const color = rgbToString([10, 100, 254]);
 
 const borgText = `
-<span color=rgb(10,100,255)>  
+<span color=${color}>  
   <span highlight=true>
     Resistance <span highlight=false outline=true>is</span> <span blink=true>futile</span>
   </span>
@@ -15,37 +18,12 @@ const short =
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
-  displayRows: 5,
-  displayColumns: 1,
-  // drawCellOutlines: true,
+  displayRows: 7,
   documentSource: borgText,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
   gridSpaceX_du: 0,
   idExtension: '1',
-}).run();
-
-new PTR(document.getElementById('root') as HTMLDivElement, {
-  scale: 3,
-  displayRows: 5,
-  // displayColumns: 1,
-  // drawCellOutlines: true,
-  documentSource: borgText,
-  borderWidth_du: 0,
-  borderColor: [0, 0, 0],
-  gridSpaceX_du: 0,
-  idExtension: '2',
-}).run();
-
-new PTR(document.getElementById('root') as HTMLDivElement, {
-  scale: 3,
-  displayRows: 1,
-  displayColumns: 1,
-  documentSource: borgText,
-  borderWidth_du: 0,
-  borderColor: [0, 0, 0],
-  gridSpaceX_du: 0,
-  idExtension: '3',
 }).run();
 
 declare global {
@@ -93,5 +71,6 @@ buttons.forEach((b) => {
   button.id = b.id;
   button.innerText = b.text;
   button.onclick = b.onClick;
+  button.style.background = color;
   renderInto?.appendChild(button);
 });
