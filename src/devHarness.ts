@@ -1,93 +1,72 @@
-import { createPTR } from "./lib/createPTR";
-import { neuromancerText } from "./sampleText/neuromancer";
+import { PTR } from './main';
+import { rgbToString } from './utils/rgbToString';
 
-const PTR = createPTR(document.getElementById("root") as HTMLDivElement, {
-  scale: 2,
-});
-
-declare global {
-  interface Window {
-    _PTR: typeof PTR;
-  }
-}
-
-window._PTR = PTR;
+const color = rgbToString([10, 100, 254]);
 
 const borgText = `
-<span>
-  <span outline=true>
-    Resistance is futile
+<span color=${color}>  
+  <span highlight=true>
+    Resistance <span highlight=false outline=true>is</span> <span blink=true>futile</span>
   </span>
-  <p highlight=true>
-    Resistance is futile
-  </p>
-  <p>We are the Borg. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
+  <p>We are the <span blink=true>B</span><span blink=true>O</span><span blink=true>R</span><span blink=true>G</span>. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
 </span>
 `;
 
-PTR.actions.setText(borgText);
+const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
+  scale: 3,
+  displayRows: 7,
+  documentSource: borgText,
+  borderWidth_du: 0,
+  borderColor: [0, 0, 0],
+  gridSpaceX_du: 0,
+  idExtension: '1',
+}).run();
+
+declare global {
+  interface Window {
+    _ptr: PTR;
+  }
+}
+
+window._ptr = ptr;
+
+const getPromptText = () => {
+  return `<span color=${color} highlight=true></span>`;
+};
 
 const buttons = [
   {
-    id: "pageUp",
-    text: "page up",
+    id: 'appendToDocument',
+    text: 'Append to document',
     onClick: () => {
-      window._PTR.actions.pageUp();
+      const text = prompt('Append to Document', getPromptText()) ?? '';
+      ptr.appendToDocument(text);
     },
   },
   {
-    id: "pageDown",
-    text: "page down",
+    id: 'setDocument',
+    text: 'Set Document',
     onClick: () => {
-      window._PTR.actions.pageDown();
+      const text = prompt('Set Document', getPromptText()) ?? '';
+      ptr.setDocument(text);
     },
   },
   {
-    id: "home",
-    text: "home",
+    id: 'reset',
+    text: 'Reset Example',
     onClick: () => {
-      window._PTR.actions.home();
-    },
-  },
-  {
-    id: "end",
-    text: "end",
-    onClick: () => {
-      window._PTR.actions.end();
-    },
-  },
-
-  {
-    id: "setText",
-    text: "set text",
-    onClick: () => {
-      const text = prompt("Define display text");
-      window._PTR.actions.setText(text ?? "");
-    },
-  },
-  {
-    id: "resetText",
-    text: "EXAMPLE",
-    onClick: () => {
-      window._PTR.actions.setText(neuromancerText);
-    },
-  },
-  {
-    id: "appendText",
-    text: "append text",
-    onClick: () => {
-      const text = prompt("Append Text");
-      window._PTR.actions.appendText(text ?? "");
+      ptr.setDocument(borgText);
     },
   },
 ];
 
-const renderInto = document.getElementById("devHarnessButtons");
+const renderInto = document.getElementById('devHarnessButtons');
 
-buttons.forEach(b => {
-  const button = document.createElement("button");
+buttons.forEach((b) => {
+  const button = document.createElement('button');
   button.id = b.id;
   button.innerText = b.text;
   button.onclick = b.onClick;
+  button.style.background = color;
   renderInto?.appendChild(button);
 });
