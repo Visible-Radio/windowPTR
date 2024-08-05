@@ -17,6 +17,7 @@ const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
   displayRows: 5,
   displayColumns: 1,
+  // drawCellOutlines: true,
   documentSource: borgText,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
@@ -27,12 +28,24 @@ const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
 new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
   displayRows: 5,
-  // displayColumns: 10,
+  // displayColumns: 1,
+  // drawCellOutlines: true,
   documentSource: borgText,
   borderWidth_du: 0,
   borderColor: [0, 0, 0],
   gridSpaceX_du: 0,
   idExtension: '2',
+}).run();
+
+new PTR(document.getElementById('root') as HTMLDivElement, {
+  scale: 3,
+  displayRows: 1,
+  displayColumns: 1,
+  documentSource: borgText,
+  borderWidth_du: 0,
+  borderColor: [0, 0, 0],
+  gridSpaceX_du: 0,
+  idExtension: '3',
 }).run();
 
 declare global {

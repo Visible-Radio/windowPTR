@@ -116,8 +116,6 @@ export class DisplayMetrics {
       numberOfColumnGaps * gridSpaceX_du +
       totalBorderWidth_du;
 
-    console.log({ displayWidth_du, displayColumns });
-
     const displayWidth_px = displayWidth_du * scale;
 
     const drawAreaLeft_du = borderWidth_du + borderGutter_du;

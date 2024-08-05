@@ -10,15 +10,6 @@ import customDefs_charWidth_7 from './customDefs_charWidth_7';
 import makeDrawingTools from './makeDrawingTools';
 import { Element, parse, printTree } from './parse/parser';
 
-/* we may have 2 kinds of animations.
-  - per letter animations that run on initial draw or persistently after initial draw
-  - TextNode animations, that run when we've finished the initial draw for all of the text node's letters */
-
-/* PTR's update method will need to regulate the introduction of each letter
-  - ie, finish drawing each letter before adding the next
-  - in doing this, it can track when the current node isn't the same as the last node
-    - at that point, if the TextNode has animations attached to it, they can be run */
-
 export class PTR {
   public rootElement: HTMLDivElement;
   private canvasElement: HTMLCanvasElement;
@@ -84,11 +75,51 @@ export class PTR {
   }
 
   onWindowResize() {
-    const res = this.dm.calculateMetrics();
-    console.log(res);
+    const lastOnScreen = this.letters.list
+      .filter((letter) => {
+        return (
+          letter.position.y > this.scrollY &&
+          letter.position.y < this.scrollY + this.dm.values.drawAreaBottom_du &&
+          letter.currentState !== letter.states.HIDDEN
+        );
+      })
+      .at(-1);
+
+    let lastOnScreenDocumentRow;
+    if (lastOnScreen) {
+      lastOnScreenDocumentRow =
+        (lastOnScreen.position.y -
+          (this.dm.values.displayRows % this.dm.values.displayUnitsPerRow_du)) /
+        this.dm.values.displayUnitsPerRow_du;
+    }
+
+    /* this is the meat of the method
+    the other stuff solves some edge cases around scroll position when resiszing the window
+    we should organize it somehow
+    */
+    this.dm.calculateMetrics();
     this.configureCanvas();
     this.layout = new Layout(this);
     this.letters.updateLayout();
+
+    if (lastOnScreen && lastOnScreenDocumentRow) {
+      const newLastOnScreenDocumentRow =
+        (lastOnScreen.position.y -
+          (this.dm.values.displayRows % this.dm.values.displayUnitsPerRow_du)) /
+        this.dm.values.displayUnitsPerRow_du;
+
+      if (lastOnScreenDocumentRow > newLastOnScreenDocumentRow) {
+        const newScrollY =
+          this.scrollY -
+          (lastOnScreenDocumentRow - newLastOnScreenDocumentRow) *
+            this.dm.values.displayUnitsPerRow_du;
+        this.scrollY = newScrollY > 0 ? newScrollY : 0;
+      } else if (lastOnScreenDocumentRow < newLastOnScreenDocumentRow) {
+        this.scrollY +=
+          (newLastOnScreenDocumentRow - lastOnScreenDocumentRow) *
+          this.dm.values.displayUnitsPerRow_du;
+      }
+    }
   }
 
   appendToDocument(incomingDocument: string) {
