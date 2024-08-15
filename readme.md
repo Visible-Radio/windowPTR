@@ -1,5 +1,28 @@
 # Window Pixel Text Renderer
 
+## Installation
+
+Example to install a release from an alpha channel:
+
+```shell
+npm i @visible-radio/ptr-window@1.0.0-alpha.2
+```
+
+Recall, that the github packages npm registry only supports authenticating with a P.A.T.
+
+The consuming project will need a .npmrc file like this:
+
+```
+@visible-radio:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NPM_TOKEN}
+```
+
+The NPM_TOKEN variable must be set in the shell:
+
+```shell
+export NPM_TOKEN=<personal access token from github>
+```
+
 ## Because why use the things that already exist when you can build them from scratch yourself?
 
 - It's a canvas based responsive display. Text is reflowed when the container size changes. Overflowing content is handled with scrolling.
