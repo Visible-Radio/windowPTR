@@ -37,10 +37,6 @@ https://visible-radio.github.io/windowPTR/
 - Attributes can be combined
   - `<span highlight=true color=rgb(0,200,190)></span>`
 
-## Newlines
-
-- The display respects `\n` characters.
-
 ## Word wrap
 
 - The display places words that won't fit on a line in the next line. If the word is wider than the display itself, it breaks the word at the character that would overflow.
