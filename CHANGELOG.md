@@ -1,3 +1,11 @@
+# 1.0.0 (2024-08-19)
+
+
+### Features
+
+* **alpha:** y no release action ([#21](https://github.com/Visible-Radio/windowPTR/issues/21)) ([62133d3](https://github.com/Visible-Radio/windowPTR/commit/62133d36a6d745ba23551e5ecdd67feaed970d1f))
+* **main:** tweak semantic release config in package.json ([4c9e5f6](https://github.com/Visible-Radio/windowPTR/commit/4c9e5f6506941061f55744351b8f4921d0f703ba))
+
 # [1.0.0-alpha.3](https://github.com/Visible-Radio/windowPTR/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2024-08-15)
 
 
