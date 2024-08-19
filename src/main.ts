@@ -1,1 +1,1 @@
-export { createPTR } from "./lib/createPTR";
+export { PTR } from './lib/PTR';

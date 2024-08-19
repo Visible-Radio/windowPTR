@@ -1,12 +1,14 @@
-import { traverseReduce } from "../../utils/traverseReduce";
+import { traverseReduce } from '../../utils/traverseReduce';
+import { rgb8Bit } from '../../utils/typeUtils/intRange';
 
 export type AttributeMap = {
   highlight?: boolean;
-  color?: `rgb(${number},${number},${number})` | null;
-  outline?: boolean | `rgb(${number},${number},${number})`;
+  color?: rgb8Bit | null;
+  outline?: boolean | rgb8Bit;
+  blink?: boolean;
 };
 
-const AttributeNamesArr = ["highlight", "color", "outline"] as const;
+const AttributeNamesArr = ['highlight', 'color', 'outline', 'blink'] as const;
 
 export class Text {
   protected __text: string;
@@ -30,11 +32,11 @@ export class Text {
     return this.__children;
   }
   toString() {
-    return `${this.__text}`.trim();
+    return `${this.__text}`.trim() + ' TEXT NODE';
   }
   get nextSibling(): Node | undefined {
     if (this.parent) {
-      const thisIndex = this.parent.children.findIndex(node => node === this);
+      const thisIndex = this.parent.children.findIndex((node) => node === this);
       const sibling: Node | undefined = this.parent.children[thisIndex + 1];
       return sibling;
     }
@@ -85,11 +87,11 @@ export class Element {
   toString() {
     return `<${this.__tagName} ${Object.entries(this.__attributes)
       .map(([attrName, attrValue]) => `${attrName}=${attrValue}`)
-      .join(" ")}>`.trim();
+      .join(' ')} ELEMENT NODE>`.trim();
   }
   get nextSibling(): Node | undefined {
     if (this.parent) {
-      const thisIndex = this.parent.children.findIndex(node => node === this);
+      const thisIndex = this.parent.children.findIndex((node) => node === this);
       const sibling: Node | undefined = this.parent.children[thisIndex + 1];
       return sibling;
     }
@@ -102,25 +104,25 @@ export type Node = Element | Text;
 /** Process the markup source and build a document tree from it */
 export function parse(document: string) {
   /** string being built. periodically gets dumped to out when entering or closing a tag. */
-  let text = "";
+  let text = '';
   const unfinished: Element[] = [];
   /** whether or not the current character is between a pair of angle brackets  */
   let inTag = false;
   for (const char of document.trim()) {
-    if (char === "<") {
+    if (char === '<') {
       inTag = true;
       if (text) {
         addText(unfinished, text.trim());
-        text = "";
+        text = '';
       }
-    } else if (char === ">") {
+    } else if (char === '>') {
       inTag = false;
       /* always add a root element*/
-      if (unfinished.length === 0 && text !== "root") {
-        addTag(unfinished, "root");
+      if (unfinished.length === 0 && text !== 'root') {
+        addTag(unfinished, 'root');
       }
       addTag(unfinished, text);
-      text = "";
+      text = '';
     } else {
       text += char;
     }
@@ -140,14 +142,14 @@ export function addText(unfinishedNodeArray: Element[], text: string) {
     const node = new Text(text, parent /* parent.attributes */);
     parent.children.push(node);
   } else {
-    addTag(unfinishedNodeArray, "root");
+    addTag(unfinishedNodeArray, 'root');
     addText(unfinishedNodeArray, text);
   }
 }
 
 /** Add an Element node to the end of the unfinished node array, or if encountering a closing tag, add the Element to the parent's array of children. Mutates the passed-in array */
 export function addTag(unfinishedNodeArray: Element[], tag: string) {
-  if (tag.startsWith("/")) {
+  if (tag.startsWith('/')) {
     /* closing tag closes the unfinished node stting at the end of the list */
     if (unfinishedNodeArray.length === 1) return;
     const node = unfinishedNodeArray.pop();
@@ -167,7 +169,7 @@ export function addTag(unfinishedNodeArray: Element[], tag: string) {
 /** Mutates the passed-in array */
 export function finish(unfinishedNodeArray: Element[]) {
   if (unfinishedNodeArray.length === 0) {
-    addTag(unfinishedNodeArray, "root");
+    addTag(unfinishedNodeArray, 'root');
   }
   while (unfinishedNodeArray.length > 1) {
     const node = unfinishedNodeArray.pop();
@@ -180,14 +182,27 @@ export function finish(unfinishedNodeArray: Element[]) {
 }
 
 export function parseTag(text: string): [string, AttributeMap] {
-  const [tagName, ...mabyeAttributes] = text.split(" ");
+  const [tagName, ...mabyeAttributes] = text.split(' ');
   const attributes = mabyeAttributes.reduce((acc: AttributeMap, maybe) => {
-    const [attributeName, attributeValue] = maybe.split("=");
+    const [attributeName, attributeValue] = maybe.split('=');
     if (isAttributeName(attributeName)) {
       // @ts-expect-error can't be arsed to do this validation right now.
       acc[attributeName] = coerceStringsToTypes(
         attributeValue
       ) as AttributeMap[typeof attributeName];
+
+      if (
+        (attributeName === 'color' && typeof attributeValue === 'string') ||
+        (attributeName === 'outline' &&
+          typeof coerceStringsToTypes(attributeValue) === 'string')
+      ) {
+        /* convert this to rgb8Bit */
+        /* `rgb(100,200,43)` */
+        /* parse strings matching that */
+        /* yes this is all ugly */
+        // @ts-expect-error can't be arsed to do this validation right now.
+        acc[attributeName] = attributeValue.match(/\d+/g);
+      }
     }
     return acc;
   }, {});
@@ -202,10 +217,10 @@ export function printTree(node: Node): string {
   const result = traverseReduce(
     node,
     (acc: { out: string }, n: Node, _, depth) => {
-      acc.out = acc.out + "\n" + " ".repeat(depth * 2) + n.toString();
+      acc.out = acc.out + '\n' + ' '.repeat(depth * 4) + n.toString();
       return acc;
     },
-    { out: "" }
+    { out: '' }
   ).out;
 
   return result;
@@ -214,11 +229,11 @@ export function printTree(node: Node): string {
 /** Catches strings representing booleans and converts them - otherwise returns the string */
 function coerceStringsToTypes(string: string) {
   switch (string) {
-    case "true":
+    case 'true':
       return true;
-    case "false":
+    case 'false':
       return false;
-    case "null":
+    case 'null':
       return null;
     default:
       return string;

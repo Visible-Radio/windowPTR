@@ -1,26 +1,8 @@
-import makeDu from "./makeDu";
-
 /**
- *
- * @returns a memoized version of makeDrawingTools()
+ * Takes a scale multiplier and returns a function that will scale it's arguments by that multiplier
  */
-export function useDrawingTools(ctx: CanvasRenderingContext2D) {
-  let lastCtx: CanvasRenderingContext2D | undefined = undefined;
-  let lastScale: number | undefined = undefined;
-  let lastResult: ReturnType<typeof makeDrawingTools> | undefined = undefined;
-
-  return (scale: number) => {
-    if (lastCtx === ctx && lastScale === scale && lastResult) {
-      return lastResult;
-    }
-
-    const result = makeDrawingTools(ctx, scale);
-    lastCtx = ctx;
-    lastScale = scale;
-    lastResult = result;
-
-    return result;
-  };
+export function makeDu(scale: number) {
+  return (...args: number[]) => args.map((a) => a * scale);
 }
 
 export default function makeDrawingTools(
@@ -37,24 +19,6 @@ export default function makeDrawingTools(
 
   return {
     ctx,
-    /**
-     * @remarks inputs are adjusted by the current scale value
-     */
-    moveTo_du(...args: Parameters<typeof ctx.moveTo>) {
-      return withDu(ctx.moveTo)(...args);
-    },
-    /**
-     * @remarks inputs are adjusted by the current scale value
-     */
-    lineTo_du(...args: Parameters<typeof ctx.lineTo>) {
-      return withDu(ctx.lineTo)(...args);
-    },
-    /**
-     * @remarks inputs are adjusted by the current scale value
-     */
-    drawRect_du(...args: Parameters<typeof ctx.rect>) {
-      return withDu(ctx.rect)(...args);
-    },
     /**
      * @remarks inputs are adjusted by the current scale value
      */

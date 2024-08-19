@@ -1,5 +1,13 @@
 {
-  "name": "ptr-window",
+  "name": "@visible-radio/ptr-window",
+  "version": "1.0.0-alpha.3",
+  "repository": {
+    "url": "https://github.com/Visible-Radio/windowPTR.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "@Visible-Radio:registry": "https://npm.pkg.github.com"
+  },
   "private": false,
   "author": "Patrick Kaipainen",
   "description": "A responsive canvas based text renderer.",
@@ -15,7 +23,6 @@
     }
   },
   "types": "./dist/ptr.d.ts",
-  "version": "0.0.3",
   "type": "module",
   "homepage": "https://visible-radio.github.io/windowPTR/",
   "scripts": {
@@ -33,9 +40,36 @@
     "gh-pages": "^5.0.0",
     "typescript": "^4.9.3",
     "vite": "^4.0.0",
-    "vite-plugin-dts": "^3.5.2"
+    "vite-plugin-dts": "^3.5.2",
+    "@semantic-release/changelog": "github:semantic-release/changelog",
+    "@semantic-release/git": "github:semantic-release/git",
+    "semantic-release": "^24.0.0"
   },
   "dependencies": {
     "vitest": "^0.28.5"
+  },
+  "release": {
+    "branches": [
+      {
+        "name": "main",
+        "channel": "latest"
+      },
+      {
+        "name": "alpha",
+        "prerelease": true
+      },
+      {
+        "name": "beta",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      "@semantic-release/git"
+    ]
   }
 }
