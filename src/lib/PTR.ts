@@ -75,15 +75,17 @@ export class PTR {
   }
 
   onWindowResize() {
-    const lastOnScreen = this.letters.list
-      .filter((letter) => {
-        return (
-          letter.position.y > this.scrollY &&
-          letter.position.y < this.scrollY + this.dm.values.drawAreaBottom_du &&
-          letter.currentState !== letter.states.HIDDEN
-        );
-      })
-      .at(-1);
+    const lastOnScreen =
+      this.letters.list
+        .filter((letter) => {
+          return (
+            letter.position.y > this.scrollY &&
+            letter.position.y <
+              this.scrollY + this.dm.values.drawAreaBottom_du &&
+            letter.currentState !== letter.states.HIDDEN
+          );
+        })
+        .at(-1) ?? this.letters.list.at(-1);
 
     let lastOnScreenDocumentRow;
     if (lastOnScreen) {
