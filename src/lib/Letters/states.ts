@@ -127,7 +127,7 @@ export class FirstDraw extends BaseLetterState implements LetterState {
     if (this.frameTimer > this.frameInterval) {
       this.frameTimer = 0;
       if (!this.done) {
-        this.frameCounter++;
+        this.frameCounter += 1;
       }
     } else {
       this.frameTimer += deltaTime;
@@ -209,9 +209,10 @@ export class Glitching extends BaseLetterState implements LetterState {
     return super
       .getFrame(this.letter.charWidth - 1 - this.frameCounter)
       .map((px) => {
+        const [r, g, b] = px.color;
         return {
           ...px,
-          color: [200, 0, 0],
+          color: [b, r, g],
         };
       });
   }

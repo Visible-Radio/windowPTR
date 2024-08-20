@@ -39,11 +39,11 @@ export class PTR {
     this.displayOptions = {
       scale: 2,
       displayRows: 8,
-      gridSpaceX_du: -3,
+      gridSpaceX_du: 0,
       gridSpaceY_du: 5,
-      borderColor: [200, 0, 120] as rgb8Bit,
-      borderWidth_du: 1,
-      borderGutter_du: 5,
+      borderWidth_du: 0,
+      borderGutter_du: 3,
+      borderColor: [0, 0, 0] as rgb8Bit,
       documentSource: '',
       drawCellOutlines: false,
       ...options,
@@ -75,15 +75,17 @@ export class PTR {
   }
 
   onWindowResize() {
-    const lastOnScreen = this.letters.list
-      .filter((letter) => {
-        return (
-          letter.position.y > this.scrollY &&
-          letter.position.y < this.scrollY + this.dm.values.drawAreaBottom_du &&
-          letter.currentState !== letter.states.HIDDEN
-        );
-      })
-      .at(-1);
+    const lastOnScreen =
+      this.letters.list
+        .filter((letter) => {
+          return (
+            letter.position.y > this.scrollY &&
+            letter.position.y <
+              this.scrollY + this.dm.values.drawAreaBottom_du &&
+            letter.currentState !== letter.states.HIDDEN
+          );
+        })
+        .at(-1) ?? this.letters.list.at(-1);
 
     let lastOnScreenDocumentRow;
     if (lastOnScreen) {
@@ -144,23 +146,28 @@ export class PTR {
   }
 
   update() {
-    /* we can pass delta time to update - but we may not use it there */
-    this.letters.update();
     this.scrollHandler.update();
+    this.letters.update();
   }
 
   draw(deltaTime: number) {
     this.clearDrawArea();
 
     const letterPixels = this.letters.list
-      /* we'll now pass deltaTime directly to the letter's getFrame method */
       .map((letter) => letter.getFrame(deltaTime))
       .flat();
 
-    letterPixels.forEach((pixel) => {
+    for (const pixel of letterPixels) {
+      if (pixel.y - this.scrollY > this.dm.values.displayHeight_du) {
+        continue;
+      }
+      if (pixel.y - this.scrollY <= 0) {
+        continue;
+      }
       this.ctx.fillStyle = rgbToString(pixel.color);
       this.drawingTools.fillRect_du(pixel.x, pixel.y - this.scrollY, 1, 1);
-    });
+    }
+
     this.drawBorder();
     this.drawCellOutlines();
   }
@@ -244,17 +251,5 @@ export class PTR {
     };
     animate(0);
     return this;
-  }
-}
-
-export function runPTR(ptr: PTR) {
-  let lastTime = 0;
-  animate(0);
-  function animate(timeStamp: number) {
-    const deltaTime = timeStamp - lastTime;
-    lastTime = timeStamp;
-    ptr.update();
-    ptr.draw(deltaTime);
-    requestAnimationFrame(animate);
   }
 }

@@ -2,7 +2,6 @@ import { PTR } from './PTR';
 
 export class ScrollHandler {
   ptr: PTR;
-  frameInterval = 128; // how long should a frame last
   frameTimer = 0;
   frameCounter = 0;
   constructor(ptr: PTR) {
@@ -15,7 +14,9 @@ export class ScrollHandler {
       this.ptr.scrollY +
       this.ptr.dm.values.displayHeight_du -
       this.ptr.dm.values.cellHeight_du -
-      this.ptr.dm.values.gridSpaceY_du;
+      this.ptr.dm.values.borderGutter_du -
+      this.ptr.dm.values.borderWidth_du -
+      0;
 
     const i = this.ptr.letters.list.findIndex(
       (letter) => !letter.states.FIRST_DRAW.done
