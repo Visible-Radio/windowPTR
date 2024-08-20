@@ -73,13 +73,16 @@ export class Layout {
       );
 
       const notLineStart = this.cursor.x !== drawAreaLeft_du;
-      this.layoutList.push({
-        x: this.cursor.x,
-        y: this.cursor.y,
-        char: ' ',
-        node,
-        attributes: i === words.length - 1 ? {} : node.ancestorAttributes,
-      });
+      // add a space after each word, but not after the last word
+      if (i !== words.length - 1) {
+        this.layoutList.push({
+          x: this.cursor.x,
+          y: this.cursor.y,
+          char: ' ',
+          node,
+          attributes: node.ancestorAttributes,
+        });
+      }
       if (notLineStart) {
         this.cursor.x += this.stepX;
       }

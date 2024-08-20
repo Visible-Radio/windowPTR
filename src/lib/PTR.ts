@@ -39,11 +39,11 @@ export class PTR {
     this.displayOptions = {
       scale: 2,
       displayRows: 8,
-      gridSpaceX_du: -3,
+      gridSpaceX_du: 0,
       gridSpaceY_du: 5,
-      borderColor: [200, 0, 120] as rgb8Bit,
-      borderWidth_du: 1,
-      borderGutter_du: 5,
+      borderWidth_du: 0,
+      borderGutter_du: 3,
+      borderColor: [0, 0, 0] as rgb8Bit,
       documentSource: '',
       drawCellOutlines: false,
       ...options,
@@ -144,23 +144,28 @@ export class PTR {
   }
 
   update() {
-    /* we can pass delta time to update - but we may not use it there */
-    this.letters.update();
     this.scrollHandler.update();
+    this.letters.update();
   }
 
   draw(deltaTime: number) {
     this.clearDrawArea();
 
     const letterPixels = this.letters.list
-      /* we'll now pass deltaTime directly to the letter's getFrame method */
       .map((letter) => letter.getFrame(deltaTime))
       .flat();
 
-    letterPixels.forEach((pixel) => {
+    for (const pixel of letterPixels) {
+      if (pixel.y - this.scrollY > this.dm.values.displayHeight_du) {
+        continue;
+      }
+      if (pixel.y - this.scrollY <= 0) {
+        continue;
+      }
       this.ctx.fillStyle = rgbToString(pixel.color);
       this.drawingTools.fillRect_du(pixel.x, pixel.y - this.scrollY, 1, 1);
-    });
+    }
+
     this.drawBorder();
     this.drawCellOutlines();
   }
