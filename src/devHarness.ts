@@ -18,7 +18,7 @@ const withColor = (text: string) => `<span color=${color}>${text}</span>`;
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
   documentSource: borgText,
-  displayRows: 3,
+  displayRows: 5,
   borderColor: [0, 0, 0],
   idExtension: '1',
 }).run();
