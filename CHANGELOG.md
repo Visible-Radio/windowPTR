@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Visible-Radio/windowPTR/compare/v1.0.0...v1.1.0) (2024-08-20)
+
+
+### Features
+
+* **i-22:** trigger a release ([5af3eb9](https://github.com/Visible-Radio/windowPTR/commit/5af3eb993c3cabc14a9a83cb21a7345fda40ceaa))
+
 # 1.0.0 (2024-08-19)
 
 
