@@ -154,9 +154,10 @@ export class Letter {
       GLITCHING: new Glitching(this),
       BLINKING: new Blinking(this),
     };
-    this.currentState = this.previousLetter
-      ? this.states.HIDDEN
-      : this.states.FIRST_DRAW;
+    this.currentState = this.states.FIRST_DRAW;
+    // this.currentState = this.previousLetter
+    //   ? this.states.HIDDEN
+    //   : this.states.FIRST_DRAW;
   }
 
   invertDef(def: number[]) {
@@ -169,20 +170,20 @@ export class Letter {
 
   update() {
     if (this.currentState instanceof FirstDraw && this.currentState.done) {
-      this.currentState = this.states.IDLE;
+      this.states.IDLE.enter();
     } else if (
       this.previousLetter &&
       this.previousLetter.states.FIRST_DRAW.done &&
       !this.states.FIRST_DRAW.done
     ) {
-      this.currentState = this.states.FIRST_DRAW;
+      this.states.FIRST_DRAW.enter();
     } else if (this.currentState instanceof Idle && Math.random() > 0.9993) {
       this.states.GLITCHING.enter();
     } else if (
       this.currentState instanceof Glitching &&
       this.currentState.done
     ) {
-      this.currentState = this.states.IDLE;
+      this.states.IDLE.enter();
     } else if (this.currentState instanceof Idle && this.attributes.blink) {
       /* letters that should blink with this letter */
       const blinkingLetters = nodeMeta.getAllLettersForTextNode(this.node);
