@@ -94,7 +94,7 @@ export class Hidden extends BaseLetterState implements LetterState {
   }
 
   enter() {
-    /*  */
+    this.letter.currentState = this.letter.states.HIDDEN;
   }
 
   /** Returns an empty pixel array */
@@ -120,7 +120,10 @@ export class FirstDraw extends BaseLetterState implements LetterState {
   }
 
   enter() {
-    /*  */
+    this.done = false;
+    this.frameTimer = 0;
+    this.frameCounter = 0;
+    this.letter.currentState = this.letter.states.FIRST_DRAW;
   }
 
   getFrame(deltaTime: number): Pixel[] {
@@ -152,7 +155,7 @@ export class Idle extends BaseLetterState implements LetterState {
   }
 
   enter() {
-    /*  */
+    this.letter.currentState = this.letter.states.IDLE;
   }
 
   /** Returns the letter in it's 'defined' state according to the definition */
@@ -180,7 +183,6 @@ export class Glitching extends BaseLetterState implements LetterState {
   }
 
   enter() {
-    /*  */
     this.reset();
     this.letter.currentState = this.letter.states.GLITCHING;
   }
