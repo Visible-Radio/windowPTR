@@ -17,8 +17,6 @@ const withColor = (text: string) => `<span color=${color}>${text}</span>`;
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
-  // displayRows: 1,
-  // displayColumns: 1,
   documentSource: borgText,
   borderColor: [0, 0, 0],
   idExtension: '1',
@@ -35,7 +33,7 @@ declare global {
 window._ptr = ptr;
 
 const getPromptText = () => {
-  return `<span color=${color} highlight=true></span>`;
+  return withColor('');
 };
 
 const buttons = [

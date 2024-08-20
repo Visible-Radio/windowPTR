@@ -251,15 +251,3 @@ export class PTR {
     return this;
   }
 }
-
-export function runPTR(ptr: PTR) {
-  let lastTime = 0;
-  animate(0);
-  function animate(timeStamp: number) {
-    const deltaTime = timeStamp - lastTime;
-    lastTime = timeStamp;
-    ptr.update();
-    ptr.draw(deltaTime);
-    requestAnimationFrame(animate);
-  }
-}
