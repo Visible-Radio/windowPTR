@@ -14,9 +14,8 @@ class NodeMeta {
   }
   addLetter(node: Text, letter: Letter) {
     if (this.map.has(node)) {
-      const existing = this.map.get(node)!.letters;
-
-      existing.push(letter);
+      const meta = this.map.get(node)!;
+      meta.letters.push(letter);
     } else {
       this.map.set(node, { letters: [letter] });
     }
@@ -31,10 +30,10 @@ const nodeMeta = new NodeMeta();
 export class Letters {
   list: Letter[];
   ptr: PTR;
-  pauseUpdates: boolean;
   nodeMeta = nodeMeta;
   constructor(ptr: PTR) {
     this.ptr = ptr;
+
     let prev: null | Letter = null;
     this.list = ptr.layout.layoutList.map((layoutObject, i) => {
       const letter = new Letter({
@@ -45,16 +44,19 @@ export class Letters {
         letterIndex: i,
         previousLetter: prev,
         node: layoutObject.node!,
+        initialState:
+          this.ptr.displayOptions.characterResolution === 'all'
+            ? 'FIRST_DRAW'
+            : undefined,
       });
       prev = letter;
       this.nodeMeta.addLetter(layoutObject.node!, letter);
 
       return letter;
     });
-    this.pauseUpdates = false;
   }
 
-  addLetters() {
+  addLetters(characterResolution?: 'single' | 'all') {
     const lastLetterIndex = this.list.length - 1;
     const newLayoutObjects = this.ptr.layout.layoutList.slice(this.list.length);
     let prev: null | Letter = null;
@@ -70,20 +72,30 @@ export class Letters {
         letterIndex: i + 1 + lastLetterIndex,
         previousLetter: prev,
         node: layoutObject.node!,
+        initialState:
+          characterResolution === 'single'
+            ? undefined
+            : characterResolution === 'all'
+            ? 'FIRST_DRAW'
+            : this.ptr.displayOptions.characterResolution === 'all'
+            ? 'FIRST_DRAW'
+            : undefined,
       });
       prev = letter;
       this.nodeMeta.addLetter(layoutObject.node!, letter);
       return letter;
     });
-    newLetters.forEach((letter) => this.list.push(letter));
-  }
 
-  pause() {
-    this.pauseUpdates = true;
-  }
-
-  unPause() {
-    this.pauseUpdates = false;
+    const promises = newLetters.map((letter) => {
+      this.list.push(letter);
+      return new Promise<Letter>((res) => {
+        const remove = letter.addListener('FIRST_DRAW_DONE', () => {
+          remove();
+          return res(letter);
+        });
+      });
+    });
+    return Promise.all(promises);
   }
 
   updateLayout() {
@@ -95,7 +107,6 @@ export class Letters {
   }
 
   update() {
-    if (this.pauseUpdates) return;
     this.list.forEach((letter) => {
       letter.update();
     });
@@ -117,6 +128,7 @@ export class Letter {
   attributes: AttributeMap;
   letterIndex: number;
   node: Text;
+  listeners: { FIRST_DRAW_DONE: Set<(letter: Letter) => void> };
 
   constructor({
     position,
@@ -126,6 +138,7 @@ export class Letter {
     letterIndex,
     previousLetter,
     node,
+    initialState,
   }: {
     ptr: PTR;
     position: { x: number; y: number };
@@ -134,6 +147,7 @@ export class Letter {
     letterIndex: number;
     previousLetter: Letter | null;
     node: Text;
+    initialState?: keyof States;
   }) {
     this.ptr = ptr;
     this.previousLetter = previousLetter;
@@ -143,6 +157,9 @@ export class Letter {
     this.charWidth = this.ptr.defs.charWidth;
     this.attributes = attributes;
     this.node = node;
+    this.listeners = {
+      FIRST_DRAW_DONE: new Set(),
+    };
     const baseDef = ptr.defs[
       char.toUpperCase() as keyof typeof ptr.defs
     ] as number[];
@@ -154,10 +171,11 @@ export class Letter {
       GLITCHING: new Glitching(this),
       BLINKING: new Blinking(this),
     };
-    this.currentState = this.states.FIRST_DRAW;
-    // this.currentState = this.previousLetter
-    //   ? this.states.HIDDEN
-    //   : this.states.FIRST_DRAW;
+    this.currentState = initialState
+      ? this.states[initialState]
+      : this.previousLetter
+      ? this.states.HIDDEN
+      : this.states.FIRST_DRAW;
   }
 
   invertDef(def: number[]) {
@@ -168,22 +186,39 @@ export class Letter {
     return full;
   }
 
+  setState(state: keyof typeof this.states) {
+    this.states[state].enter();
+  }
+
+  addListener(
+    state: keyof typeof this.listeners,
+    callback: (letter: Letter) => void
+  ) {
+    if (state in this.listeners) {
+      if (!this.listeners[state]!.has(callback)) {
+        this.listeners[state]?.add(callback);
+        return () => this.listeners[state]?.delete(callback);
+      }
+    }
+    return () => false;
+  }
+
   update() {
     if (this.currentState instanceof FirstDraw && this.currentState.done) {
-      this.states.IDLE.enter();
+      this.setState('IDLE');
     } else if (
       this.previousLetter &&
       this.previousLetter.states.FIRST_DRAW.done &&
       !this.states.FIRST_DRAW.done
     ) {
-      this.states.FIRST_DRAW.enter();
+      this.setState('FIRST_DRAW');
     } else if (this.currentState instanceof Idle && Math.random() > 0.9993) {
-      this.states.GLITCHING.enter();
+      this.setState('GLITCHING');
     } else if (
       this.currentState instanceof Glitching &&
       this.currentState.done
     ) {
-      this.states.IDLE.enter();
+      this.setState('IDLE');
     } else if (this.currentState instanceof Idle && this.attributes.blink) {
       /* letters that should blink with this letter */
       const blinkingLetters = nodeMeta.getAllLettersForTextNode(this.node);
@@ -193,7 +228,7 @@ export class Letter {
       );
       if (readyForBlink) {
         blinkingLetters?.forEach((letter) => {
-          letter.states.BLINKING.enter();
+          letter.setState('BLINKING');
         });
       }
     }
