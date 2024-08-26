@@ -17,7 +17,10 @@ export class PTR {
   public defs: typeof customDefs_charWidth_7;
   public dm: DisplayMetrics;
   public drawingTools: ReturnType<typeof makeDrawingTools>;
-  private displayOptions: DisplayConfigOptions & { documentSource: string };
+  displayOptions: DisplayConfigOptions & {
+    documentSource: string;
+    characterResolution?: 'all' | 'single';
+  };
   private documentSource: string;
   public documentTree: Element;
   public layout: Layout;
@@ -27,7 +30,11 @@ export class PTR {
   constructor(
     containerElement: HTMLDivElement,
     options: Partial<
-      DisplayConfigOptions & { documentSource: string; idExtension?: string }
+      DisplayConfigOptions & {
+        documentSource: string;
+        idExtension?: string;
+        characterResolution?: 'all' | 'single';
+      }
     >
   ) {
     this.defs = modifyDefs(customDefs_charWidth_7);
@@ -66,7 +73,7 @@ export class PTR {
   }
 
   printTree() {
-    printTree(this.documentTree);
+    console.log(printTree(this.documentTree));
   }
 
   configureCanvas() {
@@ -124,20 +131,23 @@ export class PTR {
     }
   }
 
-  appendToDocument(incomingDocument: string) {
-    if (this.layout.layoutList.length === 0) {
-      return this.setDocument(incomingDocument);
-    }
+  async appendToDocument(
+    incomingDocument: string,
+    characterResolution?: 'all' | 'single'
+  ) {
     const incomingDocumentTree = parse(incomingDocument);
     incomingDocumentTree.children.forEach((node) =>
       this.documentTree.children.push(node)
     );
     // not really efficient - we redo the layout, even for things we have already done
     this.layout = new Layout(this);
-    this.letters.addLetters();
+    return this.letters.addLetters(characterResolution);
   }
 
-  setDocument(document: string) {
+  setDocument(document: string, characterResolution?: 'all' | 'single') {
+    if (characterResolution) {
+      this.displayOptions.characterResolution = characterResolution;
+    }
     this.documentSource = document;
     this.documentTree = parse(this.documentSource);
     this.layout = new Layout(this);

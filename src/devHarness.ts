@@ -4,34 +4,30 @@ import { rgb8Bit } from './utils/typeUtils/intRange';
 const colorArr = [10, 100, 254] as rgb8Bit;
 const color = rgbToString(colorArr);
 
-/* 
-characterResolution:
-one-by-one -> letters resolve one at a time
-word       -> letters in the node resolve as words
-all        -> every letter in that node resolves at the same time
-none       -> go directly to idle state
-*/
-
 const borgText = `
-<span color=${color}>  
+<span color=${color} >  
   <span highlight=true>
-    Resistance <span highlight=false outline=true> is</span><span blink=true>futile</span>
+    <span>Resistance</span><span highlight=false outline=true>is</span><span blink=true>futile</span>
   </span>
-  <p>We are the <span blink=true>B</span><span blink=true>O</span><span blink=true>R</span><span blink=true>G</span>. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
+  <p>We are the <span><span blink=true>B</span><span blink=true>O</span><span blink=true>R</span><span blink=true>G</span></span>. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
 </span>
 `;
 
-const withColor = (text: string) => `<span color=${color}>${text}</span>`;
+const withColor = (text: string) =>
+  `<span>
+    <span color=${color}>
+      ${text}
+    </span>
+  </span>`;
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
-  documentSource: borgText,
+  documentSource: withColor("hello world it's me"),
+  characterResolution: 'single',
   displayRows: 5,
   borderColor: [0, 0, 0],
   idExtension: '1',
 }).run();
-
-console.log(ptr.dm.values);
 
 declare global {
   interface Window {
@@ -41,25 +37,32 @@ declare global {
 
 window._ptr = ptr;
 
-const getPromptText = () => {
-  return withColor('');
-};
-
 const buttons = [
   {
     id: 'appendToDocument',
     text: 'Append to document',
     onClick: () => {
-      const text = prompt('Append to Document', getPromptText()) ?? '';
-      ptr.appendToDocument(text);
+      const text = prompt('Append to Document') ?? '';
+      ptr.appendToDocument(withColor(text));
+    },
+  },
+  {
+    id: 'appendMany',
+    text: 'Append Many',
+    onClick: async () => {
+      const text = prompt('Append to Document') ?? '';
+      await ptr.appendToDocument(withColor(text), 'all');
+      await ptr.appendToDocument(withColor(text), 'single');
+      await ptr.appendToDocument(withColor(text));
+      await ptr.appendToDocument(withColor(text));
     },
   },
   {
     id: 'setDocument',
     text: 'Set Document',
     onClick: () => {
-      const text = prompt('Set Document', getPromptText()) ?? '';
-      ptr.setDocument(text);
+      const text = prompt('Set Document') ?? '';
+      ptr.setDocument(withColor(text), 'all');
     },
   },
   {

@@ -115,14 +115,14 @@ export class FirstDraw extends BaseLetterState implements LetterState {
     super(letter);
     this.letter = letter;
     this.frameTimer = 0;
-    this.frameCounter = 0;
     this.totalFrames = this.letter.charWidth - 1;
+    this.frameCounter =
+      this.letter.char === ' ' && !this.letter.attributes.highlight
+        ? this.totalFrames - 1
+        : 0;
   }
 
   enter() {
-    this.done = false;
-    this.frameTimer = 0;
-    this.frameCounter = 0;
     this.letter.currentState = this.letter.states.FIRST_DRAW;
   }
 
@@ -138,6 +138,7 @@ export class FirstDraw extends BaseLetterState implements LetterState {
 
     if (this.frameCounter >= this.totalFrames) {
       this.done = true;
+      this.letter.listeners.FIRST_DRAW_DONE?.forEach((fn) => fn(this.letter));
     }
 
     return super.getFrame(this.frameCounter);

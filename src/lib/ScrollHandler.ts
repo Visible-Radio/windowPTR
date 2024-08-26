@@ -24,14 +24,7 @@ export class ScrollHandler {
     const currentLetter = this.ptr.letters.list[i];
 
     if (currentLetter?.position.y > scrollThreshold) {
-      this.ptr.letters.pause();
       this.scroll();
-    }
-    if (
-      this.ptr.letters.pauseUpdates &&
-      currentLetter?.position.y <= scrollThreshold
-    ) {
-      this.ptr.letters.unPause();
     }
   }
   scroll() {
