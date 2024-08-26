@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Visible-Radio/windowPTR/compare/v1.1.0...v1.2.0) (2024-08-26)
+
+
+### Features
+
+* **i-19:** allow controlling character resolution with a global option ([f126b20](https://github.com/Visible-Radio/windowPTR/commit/f126b20a537dc62845b54bedea298e23013d4551))
+
 # [1.1.0](https://github.com/Visible-Radio/windowPTR/compare/v1.0.0...v1.1.0) (2024-08-20)
 
 
