@@ -17,16 +17,14 @@ export class PTR {
   public defs: typeof customDefs_charWidth_7;
   public dm: DisplayMetrics;
   public drawingTools: ReturnType<typeof makeDrawingTools>;
-  displayOptions: DisplayConfigOptions & {
-    documentSource: string;
-    characterResolution?: 'all' | 'single';
-  };
+  displayOptions: DisplayConfigOptions;
   private documentSource: string;
   public documentTree: Element;
   public layout: Layout;
   public scrollY = 0;
   letters: Letters;
   scrollHandler: ScrollHandler;
+  characterResolution: 'all' | 'single';
   constructor(
     containerElement: HTMLDivElement,
     options: Partial<
@@ -43,26 +41,28 @@ export class PTR {
     const context = this.canvasElement.getContext('2d');
     if (!context) throw new Error('no canvas 2d context 🤷🏻');
     this.ctx = context;
-    this.displayOptions = {
-      scale: 2,
-      displayRows: 8,
-      gridSpaceX_du: 0,
-      gridSpaceY_du: 5,
-      borderWidth_du: 0,
-      borderGutter_du: 3,
-      borderColor: [0, 0, 0] as rgb8Bit,
-      documentSource: '',
-      drawCellOutlines: false,
-      ...options,
-    };
+
     this.dm = new DisplayMetrics({
       charWidth: this.defs.charWidth,
       root: this.rootElement,
-      options: this.displayOptions,
+      options: {
+        scale: 2,
+        displayRows: 8,
+        gridSpaceX_du: 0,
+        gridSpaceY_du: 5,
+        borderWidth_du: 0,
+        borderGutter_du: 3,
+        borderColor: [0, 0, 0] as rgb8Bit,
+        drawCellOutlines: false,
+        ...options, // this contains other options unrelated to the DisplayMetrics class
+      },
     });
+    this.characterResolution = options.characterResolution ?? 'single';
+    this.displayOptions = this.dm.getOptions();
+
     this.drawingTools = makeDrawingTools(this.ctx, this.dm.values.scale);
     this.configureCanvas();
-    this.documentSource = this.displayOptions.documentSource;
+    this.documentSource = options.documentSource ?? '';
     this.documentTree = parse(this.documentSource);
 
     this.layout = new Layout(this);
@@ -146,13 +146,50 @@ export class PTR {
 
   setDocument(document: string, characterResolution?: 'all' | 'single') {
     if (characterResolution) {
-      this.displayOptions.characterResolution = characterResolution;
+      this.characterResolution = characterResolution;
     }
     this.documentSource = document;
     this.documentTree = parse(this.documentSource);
     this.layout = new Layout(this);
     this.letters = new Letters(this);
     this.scrollY = 0;
+  }
+
+  setRows(rowCount: number) {
+    this.dm.setOptions((currentOptions) => ({
+      ...currentOptions,
+      displayRows: rowCount,
+    }));
+    this.displayOptions = this.dm.getOptions();
+    this.configureCanvas();
+    this.layout = new Layout(this);
+    this.letters.updateLayout();
+  }
+
+  setCols(colCount: number) {
+    this.dm.setOptions((currentOptions) => ({
+      ...currentOptions,
+      displayColumns: colCount,
+    }));
+    this.displayOptions = this.dm.getOptions();
+    this.configureCanvas();
+    this.layout = new Layout(this);
+    this.letters.updateLayout();
+  }
+
+  set<T extends keyof DisplayConfigOptions>(
+    optionKey: T,
+    value: DisplayConfigOptions[T]
+  ) {
+    this.dm.setOptions((currentOptions) => ({
+      ...currentOptions,
+      [optionKey]: value,
+    }));
+    this.displayOptions = this.dm.getOptions();
+    this.drawingTools = makeDrawingTools(this.ctx, this.dm.values.scale);
+    this.configureCanvas();
+    this.layout = new Layout(this);
+    this.letters.updateLayout();
   }
 
   update() {

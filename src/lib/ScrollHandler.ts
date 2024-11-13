@@ -21,9 +21,11 @@ export class ScrollHandler {
     const i = this.ptr.letters.list.findIndex(
       (letter) => !letter.states.FIRST_DRAW.done
     );
-    const currentLetter = this.ptr.letters.list[i];
 
-    if (currentLetter?.position.y > scrollThreshold) {
+    const currentLetter =
+      this.ptr.letters.list[i] ?? this.ptr.letters.list.at(-1);
+
+    if (currentLetter.position.y > scrollThreshold) {
       this.scroll();
     }
   }

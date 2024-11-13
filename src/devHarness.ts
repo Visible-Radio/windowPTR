@@ -22,9 +22,10 @@ const withColor = (text: string) =>
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
-  documentSource: withColor("hello world it's me"),
+  documentSource: withColor('LOL'),
   characterResolution: 'single',
-  displayRows: 5,
+  displayRows: 1,
+  // displayColumns: 1,
   borderColor: [0, 0, 0],
   idExtension: '1',
 }).run();
@@ -37,18 +38,38 @@ declare global {
 
 window._ptr = ptr;
 
-const buttons = [
+type UIControl = {
+  id: string;
+  label: string;
+} & (UIButton | UIInputNumber);
+
+type UIButton = {
+  onClick: () => void;
+  type: 'button';
+};
+
+type UIInputNumber = {
+  max: number;
+  min: number;
+  value: number;
+  type: 'inputNumber';
+  onchange: (event: any) => void;
+};
+
+const controls: UIControl[] = [
   {
     id: 'appendToDocument',
-    text: 'Append to document',
+    label: 'Append to document',
+    type: 'button',
     onClick: () => {
       const text = prompt('Append to Document') ?? '';
-      ptr.appendToDocument(withColor(text));
+      ptr.appendToDocument(withColor(text), 'all');
     },
   },
   {
     id: 'appendMany',
-    text: 'Append Many',
+    label: 'Append Many',
+    type: 'button',
     onClick: async () => {
       const text = prompt('Append to Document') ?? '';
       await ptr.appendToDocument(withColor(text), 'all');
@@ -59,7 +80,8 @@ const buttons = [
   },
   {
     id: 'setDocument',
-    text: 'Set Document',
+    label: 'Set Document',
+    type: 'button',
     onClick: () => {
       const text = prompt('Set Document') ?? '';
       ptr.setDocument(withColor(text), 'all');
@@ -67,20 +89,105 @@ const buttons = [
   },
   {
     id: 'reset',
-    text: 'Reset Example',
+    label: 'Reset Example',
+    type: 'button',
     onClick: () => {
       ptr.setDocument(borgText);
+    },
+  },
+  {
+    id: 'rowsInput',
+    type: 'inputNumber',
+    min: 1,
+    max: 50,
+    value: 1,
+    label: 'Rows',
+    onchange: (event) => {
+      ptr.setRows(parseInt(event.target.value, 10));
+    },
+  },
+  {
+    id: 'colsInput',
+    type: 'inputNumber',
+    min: 1,
+    max: 50,
+    value: ptr.dm.values.displayColumns,
+    label: 'Columns',
+    onchange: (event) => {
+      ptr.setCols(parseInt(event.target.value, 10));
+    },
+  },
+  {
+    id: 'scaleInput',
+    type: 'inputNumber',
+    min: 1,
+    max: 50,
+    value: ptr.dm.getOptions().scale,
+    label: 'Scale',
+    onchange: (event) => {
+      ptr.set('scale', parseInt(event.target.value, 10));
+    },
+  },
+  {
+    id: 'borderGutterInput',
+    type: 'inputNumber',
+    min: 0,
+    max: 50,
+    value: ptr.dm.getOptions().borderGutter_du,
+    label: 'Border Gutter',
+    onchange: (event) => {
+      ptr.set('borderGutter_du', parseInt(event.target.value, 10));
+    },
+  },
+  {
+    id: 'gridSpaceX',
+    type: 'inputNumber',
+    min: -5,
+    max: 50,
+    value: ptr.dm.getOptions().gridSpaceX_du,
+    label: 'Grid Space X',
+    onchange: (event) => {
+      ptr.set('gridSpaceX_du', parseInt(event.target.value, 10));
+    },
+  },
+  {
+    id: 'gridSpaceY',
+    type: 'inputNumber',
+    min: -5,
+    max: 50,
+    value: ptr.dm.getOptions().gridSpaceY_du,
+    label: 'Grid Space Y',
+    onchange: (event) => {
+      ptr.set('gridSpaceY_du', parseInt(event.target.value, 10));
     },
   },
 ];
 
 const renderInto = document.getElementById('devHarnessButtons');
 
-buttons.forEach((b) => {
-  const button = document.createElement('button');
-  button.id = b.id;
-  button.innerText = b.text;
-  button.onclick = b.onClick;
-  button.style.background = color;
-  renderInto?.appendChild(button);
+controls.forEach((control) => {
+  if (control.type === 'button') {
+    const button = document.createElement('button');
+    button.id = control.id;
+    button.innerText = control.label;
+    button.onclick = control.onClick;
+    button.style.background = color;
+    renderInto?.appendChild(button);
+    return;
+  }
+  if (control.type === 'inputNumber') {
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    input.id = control.id;
+    input.type = 'number';
+    input.max = control.max.toString();
+    input.min = control.min.toString();
+    input.value = control.value.toString();
+    input.style.background = color;
+    input.onchange = control.onchange;
+    label.textContent = control.label;
+    label.style.background = color;
+    label.appendChild(input);
+    renderInto?.appendChild(label);
+  }
 });

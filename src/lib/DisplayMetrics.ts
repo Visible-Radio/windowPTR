@@ -23,8 +23,14 @@ export class DisplayMetrics {
   get values() {
     return this.metrics;
   }
-  setOptions(newOptions: DisplayConfigOptions) {
-    this.options = newOptions;
+
+  getOptions() {
+    return this.options;
+  }
+  setOptions(
+    callback: (currentOptions: DisplayConfigOptions) => DisplayConfigOptions
+  ) {
+    this.options = callback(this.options);
     this.metrics = this.calculateMetrics();
     return this.metrics;
   }
