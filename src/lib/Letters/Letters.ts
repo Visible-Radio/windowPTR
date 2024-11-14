@@ -75,7 +75,7 @@ export class Letters {
             ? undefined
             : characterResolution === 'all'
             ? 'FIRST_DRAW'
-            : this.ptr.displayOptions.characterResolution === 'all'
+            : this.ptr.characterResolution === 'all'
             ? 'FIRST_DRAW'
             : undefined,
       });
