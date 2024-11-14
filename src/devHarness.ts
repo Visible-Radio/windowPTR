@@ -25,7 +25,7 @@ const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   documentSource: withColor('LOL'),
   characterResolution: 'single',
   displayRows: 1,
-  // displayColumns: 1,
+  displayColumns: 1,
   borderColor: [0, 0, 0],
   idExtension: '1',
 }).run();
@@ -84,6 +84,14 @@ const controls: UIControl[] = [
     },
   },
   {
+    id: 'toggleCellOutlines',
+    label: 'Toggle Cell Outlines',
+    type: 'button',
+    onClick: () => {
+      ptr.set('drawCellOutlines', !ptr.dm.getOptions().drawCellOutlines);
+    },
+  },
+  {
     id: 'rowsInput',
     type: 'inputNumber',
     min: 1,
@@ -119,7 +127,7 @@ const controls: UIControl[] = [
   {
     id: 'borderGutterInput',
     type: 'inputNumber',
-    min: 0,
+    min: -2,
     max: 50,
     value: ptr.dm.getOptions().borderGutter_du,
     label: 'Border Gutter',
