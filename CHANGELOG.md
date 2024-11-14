@@ -1,3 +1,11 @@
+## [1.2.3](https://github.com/Visible-Radio/windowPTR/compare/v1.2.2...v1.2.3) (2024-11-14)
+
+
+### Bug Fixes
+
+* **i-36:** add typecheck to workflow ([2d77902](https://github.com/Visible-Radio/windowPTR/commit/2d779020e8be5997e9ecc75090f7dc9622577171))
+* **i-36:** fix type to prevent undefined on ptr set method for columns ([0ba9ead](https://github.com/Visible-Radio/windowPTR/commit/0ba9ead91013a9f5619365cda3c6ce8b0e3ab72c))
+
 ## [1.2.2](https://github.com/Visible-Radio/windowPTR/compare/v1.2.1...v1.2.2) (2024-11-14)
 
 
