@@ -25,7 +25,7 @@ export class ScrollHandler {
     const currentLetter =
       this.ptr.letters.list[i] ?? this.ptr.letters.list.at(-1);
 
-    if (currentLetter.position.y > scrollThreshold) {
+    if (currentLetter?.position.y > scrollThreshold) {
       this.scroll();
     }
   }

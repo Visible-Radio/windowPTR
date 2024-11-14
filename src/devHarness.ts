@@ -67,23 +67,11 @@ const controls: UIControl[] = [
     },
   },
   {
-    id: 'appendMany',
-    label: 'Append Many',
-    type: 'button',
-    onClick: async () => {
-      const text = prompt('Append to Document') ?? '';
-      await ptr.appendToDocument(withColor(text), 'all');
-      await ptr.appendToDocument(withColor(text), 'single');
-      await ptr.appendToDocument(withColor(text));
-      await ptr.appendToDocument(withColor(text));
-    },
-  },
-  {
     id: 'setDocument',
     label: 'Set Document',
     type: 'button',
     onClick: () => {
-      const text = prompt('Set Document') ?? '';
+      const text = prompt('Set Document') ?? '_1';
       ptr.setDocument(withColor(text), 'all');
     },
   },
