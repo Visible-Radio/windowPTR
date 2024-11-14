@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/Visible-Radio/windowPTR/compare/v1.2.1...v1.2.2) (2024-11-14)
+
+
+### Bug Fixes
+
+* **i-34:** remove npmPublish:false from sr/npm plugin ([d8a882c](https://github.com/Visible-Radio/windowPTR/commit/d8a882c064824d99c8302900ffbbee975f1d9ede))
+
 ## [1.2.1](https://github.com/Visible-Radio/windowPTR/compare/v1.2.0...v1.2.1) (2024-11-14)
 
 
