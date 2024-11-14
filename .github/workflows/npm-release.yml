@@ -3,9 +3,45 @@ name: 'npm release'
 on: push
 
 jobs:
+  install-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Commit
+        uses: actions/checkout@v4
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        id: deps-cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm
+      - name: Install dependencies if cache invalid
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci
+  typeCheck:
+    runs-on: ubuntu-latest
+    needs: install-cache
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Restore npm dependencies
+        uses: actions/cache@v4
+        id: deps-cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm
+      - run: |
+          npx tsc --noEmit
   publish-release:
     runs-on: ubuntu-latest
-    needs: []
+    needs: ['install-cache', 'typeCheck']
     # publish only if we're merging into designated branches. note adding more may require adding keys in package.json -> release.branches
     if: contains(fromJson('["refs/heads/alpha","refs/heads/beta", "refs/heads/main"]'), github.ref)
     steps:
@@ -19,7 +55,6 @@ jobs:
           scope: '@visible-radio'
       - name: Run Semantic Release
         run: |
-          npm ci
           npm run build
           npx semantic-release
         env:
