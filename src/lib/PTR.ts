@@ -155,28 +155,6 @@ export class PTR {
     this.scrollY = 0;
   }
 
-  setRows(rowCount: number) {
-    this.dm.setOptions((currentOptions) => ({
-      ...currentOptions,
-      displayRows: rowCount,
-    }));
-    this.displayOptions = this.dm.getOptions();
-    this.configureCanvas();
-    this.layout = new Layout(this);
-    this.letters.updateLayout();
-  }
-
-  setCols(colCount: number) {
-    this.dm.setOptions((currentOptions) => ({
-      ...currentOptions,
-      displayColumns: colCount,
-    }));
-    this.displayOptions = this.dm.getOptions();
-    this.configureCanvas();
-    this.layout = new Layout(this);
-    this.letters.updateLayout();
-  }
-
   set<T extends keyof DisplayConfigOptions>(
     optionKey: T,
     value: DisplayConfigOptions[T]

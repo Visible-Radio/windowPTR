@@ -91,7 +91,7 @@ const controls: UIControl[] = [
     value: 1,
     label: 'Rows',
     onchange: (event) => {
-      ptr.setRows(parseInt(event.target.value, 10));
+      ptr.set('displayRows', parseInt(event.target.value, 10));
     },
   },
   {
@@ -102,7 +102,7 @@ const controls: UIControl[] = [
     value: ptr.dm.values.displayColumns,
     label: 'Columns',
     onchange: (event) => {
-      ptr.setCols(parseInt(event.target.value, 10));
+      ptr.set('displayColumns', parseInt(event.target.value, 10));
     },
   },
   {
