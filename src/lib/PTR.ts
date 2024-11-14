@@ -157,7 +157,7 @@ export class PTR {
 
   set<T extends keyof DisplayConfigOptions>(
     optionKey: T,
-    value: DisplayConfigOptions[T]
+    value: NonNullable<DisplayConfigOptions[T]>
   ) {
     this.dm.setOptions((currentOptions) => ({
       ...currentOptions,
