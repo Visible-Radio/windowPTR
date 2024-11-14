@@ -45,9 +45,7 @@ export class Letters {
         previousLetter: prev,
         node: layoutObject.node!,
         initialState:
-          this.ptr.displayOptions.characterResolution === 'all'
-            ? 'FIRST_DRAW'
-            : undefined,
+          this.ptr.characterResolution === 'all' ? 'FIRST_DRAW' : undefined,
       });
       prev = letter;
       this.nodeMeta.addLetter(layoutObject.node!, letter);
