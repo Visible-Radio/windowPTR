@@ -1,3 +1,13 @@
+## [1.2.1](https://github.com/Visible-Radio/windowPTR/compare/v1.2.0...v1.2.1) (2024-11-14)
+
+
+### Bug Fixes
+
+* **i-26:** fix reference that typecheck on pre-commit hooks would fix ([bd09b05](https://github.com/Visible-Radio/windowPTR/commit/bd09b0523b5df4f7b4de37022420b85a0546df20))
+* **i-26:** fix scroll bug on last character in document ([8d114f9](https://github.com/Visible-Radio/windowPTR/commit/8d114f98623f25df7e2c2931f5117a8692bea3c8))
+* **i-26:** remove redundant set methods ([b946833](https://github.com/Visible-Radio/windowPTR/commit/b94683326adc8239fb842ddcd345a77c975ffb3a))
+* **i-26:** slightly nicer playground UI ([410ca58](https://github.com/Visible-Radio/windowPTR/commit/410ca58eab9131a247ffcb6c73cafea2b3b2b659))
+
 # [1.2.0](https://github.com/Visible-Radio/windowPTR/compare/v1.1.0...v1.2.0) (2024-08-26)
 
 
