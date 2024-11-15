@@ -23,9 +23,9 @@ const withColor = (text: string) =>
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
   documentSource: withColor('LOL'),
-  characterResolution: 'single',
-  displayRows: 1,
-  displayColumns: 1,
+  characterResolution: 'all',
+  displayRows: 8,
+  displayColumns: 12,
   borderColor: [0, 0, 0],
   idExtension: '1',
 }).run();
