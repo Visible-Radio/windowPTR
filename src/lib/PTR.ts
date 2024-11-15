@@ -5,6 +5,7 @@ import { DisplayMetrics } from './DisplayMetrics';
 import { Layout } from './Layout';
 import { Letters } from './Letters/Letters';
 import { ScrollHandler } from './ScrollHandler';
+import { MouseTracker } from './MouseTracker/MouseTracker';
 import { DisplayConfigOptions } from './calculateDisplayMetrics';
 import customDefs_charWidth_7 from './customDefs_charWidth_7';
 import makeDrawingTools from './makeDrawingTools';
@@ -12,7 +13,7 @@ import { Element, parse, printTree } from './parse/parser';
 
 export class PTR {
   public rootElement: HTMLDivElement;
-  private canvasElement: HTMLCanvasElement;
+  canvasElement: HTMLCanvasElement;
   public ctx: CanvasRenderingContext2D;
   public defs: typeof customDefs_charWidth_7;
   public dm: DisplayMetrics;
@@ -24,6 +25,7 @@ export class PTR {
   public scrollY = 0;
   letters: Letters;
   scrollHandler: ScrollHandler;
+  moustTracker: MouseTracker;
   characterResolution: 'all' | 'single';
   constructor(
     containerElement: HTMLDivElement,
@@ -68,6 +70,7 @@ export class PTR {
     this.layout = new Layout(this);
     this.letters = new Letters(this);
     this.scrollHandler = new ScrollHandler(this);
+    this.moustTracker = new MouseTracker(this);
 
     window.addEventListener('resize', () => this.onWindowResize());
   }
