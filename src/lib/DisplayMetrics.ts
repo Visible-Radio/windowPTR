@@ -129,7 +129,7 @@ export class DisplayMetrics {
     const drawAreaTop_du = borderWidth_du + borderGutter_du;
 
     const drawAreaRight_du =
-      displayWidth_du - (borderGutter_du + borderWidth_du) * 2;
+      displayWidth_du - (borderGutter_du + borderWidth_du);
 
     const drawAreaBottom_du =
       displayHeight_du - (borderGutter_du + borderWidth_du);

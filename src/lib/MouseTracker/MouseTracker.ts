@@ -4,6 +4,8 @@ export class MouseTracker {
   ptr: PTR;
   x = 0;
   y = 0;
+  x_du = 0;
+  y_du = 0;
   onScreen = false;
   constructor(ptr: PTR) {
     this.ptr = ptr;
@@ -18,27 +20,37 @@ export class MouseTracker {
     );
   }
 
-  logRawPosition(event: MouseEvent, label: string) {
+  padNumber(num: number) {
+    return num.toString().padStart(4, '_');
+  }
+
+  logPosition(event: MouseEvent, label: string) {
     console.log(
-      `X ${event.offsetX.toString().padStart(4, '_')} Y ${event.offsetY
-        .toString()
-        .padStart(4, '_')} ${label}`
+      `__X ${this.padNumber(event.offsetX)} __Y ${this.padNumber(
+        event.offsetY
+      )} ${label}`
+    );
+    console.log(
+      `xdu ${this.padNumber(this.x_du)} ydu ${this.padNumber(this.y_du)}`
     );
   }
 
   onMouseMove(event: MouseEvent) {
-    this.logRawPosition(event, 'onMouseMove');
+    // this.logPosition(event, 'onMouseMove');
     this.x = event.offsetX;
     this.y = event.offsetY;
+
+    this.x_du = Math.round(this.x / this.ptr.dm.values.scale);
+    this.y_du = Math.round(this.y / this.ptr.dm.values.scale);
   }
 
   onMouseEnter(event: MouseEvent) {
-    this.logRawPosition(event, 'onMouseEnter');
+    // this.logPosition(event, 'onMouseEnter');
     this.onScreen = true;
   }
 
   onMouseLeave(event: MouseEvent) {
-    this.logRawPosition(event, 'onMouseLeave');
+    // this.logPosition(event, 'onMouseLeave');
     this.onScreen = false;
   }
 

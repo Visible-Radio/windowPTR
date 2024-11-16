@@ -27,9 +27,10 @@ const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   ),
   characterResolution: 'all',
   displayRows: 12,
-  displayColumns: 24,
+  // displayColumns: 24,
   borderColor: [0, 0, 0],
   idExtension: '1',
+  drawBoundingBoxes: true,
 }).run();
 
 declare global {
