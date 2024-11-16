@@ -3,34 +3,9 @@ import { PTR } from '../PTR';
 import { AttributeMap, Text } from '../parse/parser';
 import { Blinking, FirstDraw, Glitching, Hidden, Idle, States } from './states';
 
-type NodeMapData = {
-  letters: Letter[];
-};
-
-class NodeMeta {
-  private map: WeakMap<Text, NodeMapData>;
-  constructor() {
-    this.map = new WeakMap();
-  }
-  addLetter(node: Text, letter: Letter) {
-    if (this.map.has(node)) {
-      const meta = this.map.get(node)!;
-      meta.letters.push(letter);
-    } else {
-      this.map.set(node, { letters: [letter] });
-    }
-  }
-  getAllLettersForTextNode(node: Text) {
-    return this.map.get(node)?.letters;
-  }
-}
-
-const nodeMeta = new NodeMeta();
-
 export class Letters {
   list: Letter[];
   ptr: PTR;
-  nodeMeta = nodeMeta;
   constructor(ptr: PTR) {
     this.ptr = ptr;
 
@@ -48,7 +23,7 @@ export class Letters {
           this.ptr.characterResolution === 'all' ? 'FIRST_DRAW' : undefined,
       });
       prev = letter;
-      this.nodeMeta.addLetter(layoutObject.node!, letter);
+      this.ptr.nodeMetaMap.addLetter(layoutObject.node!, letter);
 
       return letter;
     });
@@ -80,7 +55,7 @@ export class Letters {
             : undefined,
       });
       prev = letter;
-      this.nodeMeta.addLetter(layoutObject.node!, letter);
+      this.ptr.nodeMetaMap.addLetter(layoutObject.node!, letter);
       return letter;
     });
 
@@ -219,7 +194,9 @@ export class Letter {
       this.setState('IDLE');
     } else if (this.currentState instanceof Idle && this.attributes.blink) {
       /* letters that should blink with this letter */
-      const blinkingLetters = nodeMeta.getAllLettersForTextNode(this.node);
+      const blinkingLetters = this.ptr.nodeMetaMap.getAllLettersForTextNode(
+        this.node
+      );
       /* check if all are ready to blink */
       const readyForBlink = blinkingLetters?.every(
         (letter) => letter.states.FIRST_DRAW.done

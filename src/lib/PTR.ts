@@ -9,7 +9,9 @@ import { MouseTracker } from './MouseTracker/MouseTracker';
 import { DisplayConfigOptions } from './calculateDisplayMetrics';
 import customDefs_charWidth_7 from './customDefs_charWidth_7';
 import makeDrawingTools from './makeDrawingTools';
-import { Element, parse, printTree } from './parse/parser';
+import { Element, Node, parse, printTree, Text } from './parse/parser';
+import { NodeMetaMap } from './NodeMetaMap/NodeMetaMap';
+import { traverseReduce } from '../utils/traverseReduce';
 
 export class PTR {
   public rootElement: HTMLDivElement;
@@ -26,7 +28,9 @@ export class PTR {
   letters: Letters;
   scrollHandler: ScrollHandler;
   moustTracker: MouseTracker;
+  nodeMetaMap: NodeMetaMap;
   characterResolution: 'all' | 'single';
+
   constructor(
     containerElement: HTMLDivElement,
     options: Partial<
@@ -43,7 +47,6 @@ export class PTR {
     const context = this.canvasElement.getContext('2d');
     if (!context) throw new Error('no canvas 2d context 🤷🏻');
     this.ctx = context;
-
     this.dm = new DisplayMetrics({
       charWidth: this.defs.charWidth,
       root: this.rootElement,
@@ -61,17 +64,15 @@ export class PTR {
     });
     this.characterResolution = options.characterResolution ?? 'single';
     this.displayOptions = this.dm.getOptions();
-
     this.drawingTools = makeDrawingTools(this.ctx, this.dm.values.scale);
     this.configureCanvas();
     this.documentSource = options.documentSource ?? '';
     this.documentTree = parse(this.documentSource);
-
+    this.nodeMetaMap = new NodeMetaMap();
     this.layout = new Layout(this);
     this.letters = new Letters(this);
     this.scrollHandler = new ScrollHandler(this);
     this.moustTracker = new MouseTracker(this);
-
     window.addEventListener('resize', () => this.onWindowResize());
   }
 
@@ -198,6 +199,7 @@ export class PTR {
 
     this.drawBorder();
     this.drawCellOutlines();
+    this.drawNodeBoundingBoxes();
   }
 
   clearDrawArea() {
@@ -266,6 +268,36 @@ export class PTR {
       displayWidth_du - borderWidth_du,
       displayHeight_du - borderWidth_du
     );
+  }
+
+  visitNodes(callback: (node: Node) => void) {
+    traverseReduce(
+      this.documentTree,
+      (_, node) => {
+        callback(node);
+        return undefined;
+      },
+      undefined
+    );
+  }
+
+  drawNodeBoundingBoxes() {
+    this.visitNodes((node) => {
+      if (node instanceof Text) {
+        const nodeMeta = this.nodeMetaMap.map.get(node);
+        if (!nodeMeta) return;
+        nodeMeta.boundingBoxes.forEach((box) => {
+          this.ctx.lineWidth = 1;
+          this.ctx.strokeStyle = rgbToString([0, 100, 220]);
+          this.drawingTools.strokeRect_du(
+            box.topLeft.x,
+            box.topLeft.y,
+            box.width,
+            box.height
+          );
+        });
+      }
+    });
   }
 
   run() {

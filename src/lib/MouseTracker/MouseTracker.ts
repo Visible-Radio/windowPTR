@@ -53,6 +53,9 @@ export class MouseTracker {
     we need _all_ of the nodes in which the cursor is positioned
     because _any_ of them could have an onclick handler or hover behavior attached
     so we need the whole chain of ancestors - from the most specific node, all the way back to the root
+
+    so...
+    we need our node meta data lookup map...
     */
   }
 }
