@@ -9,7 +9,7 @@ const borgText = `
   <span highlight=true>
     <span>Resistance</span><span highlight=false outline=true>is</span><span blink=true>futile</span>
   </span>
-  <p>We are the <span><span blink=true>B</span><span blink=true>O</span><span blink=true>R</span><span blink=true>G</span></span>. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness to our own. Your culture will adapt to service us.</p>
+  <p>We are the <span><span blink=true>B</span><span blink=true>O</span><span blink=true>R</span><span blink=true>G</span></span>. Lower your shields and surrender your ships. We will add your biological and technological distinctiveness <span color=rgb(190,120,0)>to our own. Your culture will adapt to</span> service us.</p>
 </span>
 `;
 
@@ -22,10 +22,12 @@ const withColor = (text: string) =>
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
   scale: 3,
-  documentSource: withColor('LOL'),
+  documentSource: withColor(
+    'hello this is my text that I put in here for you all to read.'
+  ),
   characterResolution: 'all',
-  displayRows: 8,
-  displayColumns: 12,
+  displayRows: 12,
+  displayColumns: 24,
   borderColor: [0, 0, 0],
   idExtension: '1',
 }).run();
@@ -61,7 +63,7 @@ const controls: UIControl[] = [
     id: 'appendToDocument',
     label: 'Append to document',
     type: 'button',
-    onClick: () => {
+    onClick: async () => {
       const text = prompt('Append to Document') ?? '';
       ptr.appendToDocument(withColor(text), 'all');
     },
