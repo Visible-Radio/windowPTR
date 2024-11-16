@@ -27,7 +27,7 @@ export class PTR {
   public scrollY = 0;
   letters: Letters;
   scrollHandler: ScrollHandler;
-  moustTracker: MouseTracker;
+  mouseTracker: MouseTracker;
   nodeMetaMap: NodeMetaMap;
   characterResolution: 'all' | 'single';
 
@@ -59,6 +59,7 @@ export class PTR {
         borderGutter_du: 3,
         borderColor: [0, 0, 0] as rgb8Bit,
         drawCellOutlines: false,
+        drawBoundingBoxes: false,
         ...options, // this contains other options unrelated to the DisplayMetrics class
       },
     });
@@ -72,7 +73,7 @@ export class PTR {
     this.layout = new Layout(this);
     this.letters = new Letters(this);
     this.scrollHandler = new ScrollHandler(this);
-    this.moustTracker = new MouseTracker(this);
+    this.mouseTracker = new MouseTracker(this);
     window.addEventListener('resize', () => this.onWindowResize());
   }
 
@@ -86,26 +87,6 @@ export class PTR {
   }
 
   onWindowResize() {
-    const lastOnScreen =
-      this.letters.list
-        .filter((letter) => {
-          return (
-            letter.position.y > this.scrollY &&
-            letter.position.y <
-              this.scrollY + this.dm.values.drawAreaBottom_du &&
-            letter.currentState !== letter.states.HIDDEN
-          );
-        })
-        .at(-1) ?? this.letters.list.at(-1);
-
-    let lastOnScreenDocumentRow;
-    if (lastOnScreen) {
-      lastOnScreenDocumentRow =
-        (lastOnScreen.position.y -
-          (this.dm.values.displayRows % this.dm.values.displayUnitsPerRow_du)) /
-        this.dm.values.displayUnitsPerRow_du;
-    }
-
     /* this is the meat of the method
     the other stuff solves some edge cases around scroll position when resiszing the window
     we should organize it somehow
@@ -114,25 +95,6 @@ export class PTR {
     this.configureCanvas();
     this.layout = new Layout(this);
     this.letters.updateLayout();
-
-    if (lastOnScreen && lastOnScreenDocumentRow) {
-      const newLastOnScreenDocumentRow =
-        (lastOnScreen.position.y -
-          (this.dm.values.displayRows % this.dm.values.displayUnitsPerRow_du)) /
-        this.dm.values.displayUnitsPerRow_du;
-
-      if (lastOnScreenDocumentRow > newLastOnScreenDocumentRow) {
-        const newScrollY =
-          this.scrollY -
-          (lastOnScreenDocumentRow - newLastOnScreenDocumentRow) *
-            this.dm.values.displayUnitsPerRow_du;
-        this.scrollY = newScrollY > 0 ? newScrollY : 0;
-      } else if (lastOnScreenDocumentRow < newLastOnScreenDocumentRow) {
-        this.scrollY +=
-          (newLastOnScreenDocumentRow - lastOnScreenDocumentRow) *
-          this.dm.values.displayUnitsPerRow_du;
-      }
-    }
   }
 
   async appendToDocument(
@@ -200,6 +162,33 @@ export class PTR {
     this.drawBorder();
     this.drawCellOutlines();
     this.drawNodeBoundingBoxes();
+    this.drawCrossHair();
+  }
+
+  drawCrossHair() {
+    if (!this.mouseTracker.onScreen) return;
+    const lineLength = this.dm.values.cellHeight_du / 4;
+    type line = [number, number, number, number];
+
+    const lines: line[] = [
+      [this.mouseTracker.x_du, this.mouseTracker.y_du + 1, 1, lineLength],
+      [this.mouseTracker.x_du + 1, this.mouseTracker.y_du, lineLength, 1],
+      [this.mouseTracker.x_du, this.mouseTracker.y_du + 1, 1, lineLength],
+      [
+        this.mouseTracker.x_du - lineLength,
+        this.mouseTracker.y_du,
+        lineLength,
+        1,
+      ],
+      [
+        this.mouseTracker.x_du,
+        this.mouseTracker.y_du - lineLength,
+        1,
+        lineLength,
+      ],
+    ];
+
+    lines.forEach((line) => this.drawingTools.fillRect_du(...line));
   }
 
   clearDrawArea() {
@@ -282,6 +271,7 @@ export class PTR {
   }
 
   drawNodeBoundingBoxes() {
+    if (!this.displayOptions.drawBoundingBoxes) return;
     this.visitNodes((node) => {
       if (node instanceof Text) {
         const nodeMeta = this.nodeMetaMap.map.get(node);
@@ -291,7 +281,7 @@ export class PTR {
           this.ctx.strokeStyle = rgbToString([0, 100, 220]);
           this.drawingTools.strokeRect_du(
             box.topLeft.x,
-            box.topLeft.y,
+            box.topLeft.y - this.scrollY,
             box.width,
             box.height
           );

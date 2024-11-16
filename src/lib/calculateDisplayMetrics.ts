@@ -9,6 +9,7 @@ export const displayConfigOptionsDefault = {
   borderWidth_du: 0,
   borderGutter_du: 5,
   drawCellOutlines: false,
+  drawboundingBoxes: false,
   displayColumns: null,
 };
 
@@ -21,5 +22,6 @@ export type DisplayConfigOptions = {
   borderWidth_du: number; // 0,
   borderGutter_du: number; // 5,
   drawCellOutlines: boolean; // false,
+  drawBoundingBoxes: boolean; // false,
   displayColumns?: number | undefined; // null,
 };
