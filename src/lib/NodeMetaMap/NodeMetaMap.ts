@@ -102,6 +102,8 @@ export class NodeMetaMap {
   constructor() {
     this.map = new WeakMap();
   }
+
+  // letters hang around across layout changes - because they have state that we should preserve
   addLetter(node: Text, letter: Letter) {
     if (this.map.has(node)) {
       const meta = this.map.get(node)!;
@@ -121,5 +123,14 @@ export class NodeMetaMap {
   }
   getAllLettersForTextNode(node: Text) {
     return this.map.get(node)?.letters;
+  }
+
+  // bounding boxes and layout objects need to be purged when the layout changes
+  clearStale(node: Text) {
+    if (this.map.has(node)) {
+      const meta = this.map.get(node)!;
+      meta.boundingBoxes = [];
+      meta.layoutObjects = [];
+    }
   }
 }

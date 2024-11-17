@@ -1,3 +1,6 @@
+import { Point } from '../../utils/typeUtils/intRange';
+import { BoundingBox } from '../NodeMetaMap/NodeMetaMap';
+import { Node, Text } from '../parse/parser';
 import { PTR } from '../PTR';
 
 export class MouseTracker {
@@ -17,6 +20,9 @@ export class MouseTracker {
     );
     this.ptr.canvasElement.addEventListener('mouseleave', (event) =>
       this.onMouseLeave(event)
+    );
+    this.ptr.canvasElement.addEventListener('click', (event) =>
+      this.handleClick(event)
     );
   }
 
@@ -39,7 +45,6 @@ export class MouseTracker {
     // this.logPosition(event, 'onMouseMove');
     this.x = event.offsetX;
     this.y = event.offsetY;
-
     this.x_du = Math.round(this.x / this.ptr.dm.values.scale);
     this.y_du = Math.round(this.y / this.ptr.dm.values.scale);
   }
@@ -54,20 +59,60 @@ export class MouseTracker {
     this.onScreen = false;
   }
 
-  // we can try this
-  getLetterAtPosition(x: number, y: number) {
+  handleClick(event: MouseEvent) {
     /*  */
-  }
+    // this.logPosition(event, 'handleClick');
 
-  // but I suspect we actually want this
-  getNodesAtPosition(x: number, y: number) {
-    /* 
-    we need _all_ of the nodes in which the cursor is positioned
-    because _any_ of them could have an onclick handler or hover behavior attached
-    so we need the whole chain of ancestors - from the most specific node, all the way back to the root
-
-    so...
-    we need our node meta data lookup map...
-    */
+    this.ptr.visitNodes((node) => {
+      if (node instanceof Text) {
+        const meta = this.ptr.nodeMetaMap.map.get(node);
+        if (!meta) return;
+        meta.boundingBoxes.forEach((box) => {
+          if (isPointInBox({ x: this.x_du, y: this.y_du }, box)) {
+            /* 
+            actually, we need to now traverse back up the chain of ancestors
+            and search for click handlers
+            for our purposes, we should fire the closest one            
+            */
+            const nodeAttributes = traverseAncestors(node, (node) => {
+              if (node instanceof Text) {
+                return undefined;
+              } else {
+                return node.attributes;
+              }
+            });
+            console.log(nodeAttributes);
+          }
+        });
+      }
+    });
   }
+}
+
+// the type comes out of traverseAncestors correctly, so this is fine.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function traverseAncestors<T extends (arg0: Node) => any>(
+  node: Node,
+  collectorFn: T,
+  acc: Array<NonNullable<ReturnType<T>>> = []
+) {
+  const collectorResult = collectorFn(node);
+  if (node.parent) {
+    return traverseAncestors(
+      node.parent,
+      collectorFn,
+      collectorResult ? [...acc, collectorResult] : acc
+    );
+  }
+  return acc;
+}
+
+function isPointInBox(point: Point, boundingBox: BoundingBox): boolean {
+  /* we'll likely also need to account for scroll position */
+  return (
+    point.x >= boundingBox.topLeft.x &&
+    point.x <= boundingBox.bottomRight.x &&
+    point.y >= boundingBox.topLeft.y &&
+    point.y <= boundingBox.bottomRight.y
+  );
 }
