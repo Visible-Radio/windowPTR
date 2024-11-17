@@ -6,9 +6,16 @@ export type AttributeMap = {
   color?: rgb8Bit | null;
   outline?: boolean | rgb8Bit;
   blink?: boolean;
+  onClick?: 'string';
 };
 
-const AttributeNamesArr = ['highlight', 'color', 'outline', 'blink'] as const;
+const AttributeNamesArr = [
+  'highlight',
+  'color',
+  'outline',
+  'blink',
+  'onClick',
+] as const;
 
 export class Text {
   protected __text: string;
