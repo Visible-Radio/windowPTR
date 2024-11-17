@@ -72,7 +72,16 @@ export class Letters {
   }
 
   updateLayout() {
-    /* namely, when the window is resized and we need to reflow the text */
+    /* 
+    at this point, up in PTR, we should have created a new layout
+    the gives us new layout objects
+    but we want the same old letters - but their position needs to match that of the new layout objects
+
+    so we go through the layout list up in PTR
+    get the position
+    and apply it to each letter. the lists are the same length and indexes correspond 1:1
+    */
+
     this.ptr.layout.layoutList.forEach((layoutObject, i) => {
       const newPosition = { x: layoutObject.x, y: layoutObject.y };
       this.list[i].position = newPosition;

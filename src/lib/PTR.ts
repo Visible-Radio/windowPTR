@@ -87,10 +87,6 @@ export class PTR {
   }
 
   onWindowResize() {
-    /* this is the meat of the method
-    the other stuff solves some edge cases around scroll position when resiszing the window
-    we should organize it somehow
-    */
     this.dm.calculateMetrics();
     this.configureCanvas();
     this.layout = new Layout(this);
@@ -116,6 +112,7 @@ export class PTR {
     }
     this.documentSource = document;
     this.documentTree = parse(this.documentSource);
+    this.nodeMetaMap = new NodeMetaMap();
     this.layout = new Layout(this);
     this.letters = new Letters(this);
     this.scrollY = 0;

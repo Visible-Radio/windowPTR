@@ -1,5 +1,5 @@
 import { traverseReduce } from '../utils/traverseReduce';
-import { createBoundingBox } from './NodeMetaMap/NodeMetaMap';
+import { createBoundingBox, NodeMetaMap } from './NodeMetaMap/NodeMetaMap';
 import { PTR } from './PTR';
 import { AttributeMap, Text } from './parse/parser';
 
@@ -52,6 +52,7 @@ export class Layout {
   }
 
   private layout(node: Text) {
+    this.ptr.nodeMetaMap.clearStale(node);
     const { drawAreaLeft_du } = this.ptr.dm.values;
     const words = node.text.split(' ');
     /* 
