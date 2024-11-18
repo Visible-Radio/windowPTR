@@ -163,12 +163,12 @@ export class Layout {
       firstBox.set(
         'topRight',
         this.ptr.dm.values.drawAreaRight_du,
-        lastLetter.y
+        firstLetter.y
       );
       firstBox.set(
         'bottomRight',
         this.ptr.dm.values.drawAreaRight_du,
-        lastLetter.y + letterHeight
+        firstLetter.y + letterHeight
       );
     }
 

@@ -62,6 +62,7 @@ export class MouseTracker {
   handleClick(event: MouseEvent) {
     /*  */
     // this.logPosition(event, 'handleClick');
+    this.ptr.printTree();
 
     this.ptr.visitNodes((node) => {
       if (node instanceof Text) {
@@ -74,11 +75,17 @@ export class MouseTracker {
             and search for click handlers
             for our purposes, we should fire the closest one            
             */
+
+            /* 
+            may want to compare bounding box areas
+            the most specific node in which the event occured
+            is the node with the smallest total bounding box area
+            */
             const nodeAttributes = traverseAncestors(node, (node) => {
               if (node instanceof Text) {
                 return undefined;
               } else {
-                return node.attributes;
+                return node.attributes.onClick;
               }
             });
             console.log(nodeAttributes);
