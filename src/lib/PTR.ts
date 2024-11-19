@@ -12,6 +12,7 @@ import makeDrawingTools from './makeDrawingTools';
 import { Element, Node, parse, printTree, Text } from './parse/parser';
 import { NodeMetaMap } from './NodeMetaMap/NodeMetaMap';
 import { traverseReduce } from '../utils/traverseReduce';
+import { generateRandomColors } from './utils';
 
 export class PTR {
   public rootElement: HTMLDivElement;
@@ -30,6 +31,7 @@ export class PTR {
   mouseTracker: MouseTracker;
   nodeMetaMap: NodeMetaMap;
   characterResolution: 'all' | 'single';
+  functions?: Record<string, (ptr: PTR) => void>;
 
   constructor(
     containerElement: HTMLDivElement,
@@ -38,6 +40,7 @@ export class PTR {
         documentSource: string;
         idExtension?: string;
         characterResolution?: 'all' | 'single';
+        functions?: Record<string, (ptr: PTR) => void>;
       }
     >
   ) {
@@ -63,6 +66,7 @@ export class PTR {
         ...options, // this contains other options unrelated to the DisplayMetrics class
       },
     });
+    this.functions = options?.functions;
     this.characterResolution = options.characterResolution ?? 'single';
     this.displayOptions = this.dm.getOptions();
     this.drawingTools = makeDrawingTools(this.ctx, this.dm.values.scale);
@@ -158,32 +162,64 @@ export class PTR {
 
     this.drawBorder();
     this.drawCellOutlines();
-    this.drawNodeBoundingBoxes();
+    // this.drawNodeBoundingBoxes();
     this.drawCrossHair();
   }
 
   drawCrossHair() {
     if (!this.mouseTracker.onScreen) return;
-    const lineLength = this.dm.values.cellHeight_du / 4;
+    let lineThickness = 1;
+    let lineLength = 2;
+    if (this.mouseTracker.cursorType === 'pointer') {
+      lineLength *= 1.25;
+    }
+
     type line = [number, number, number, number];
 
     const lines: line[] = [
-      [this.mouseTracker.x_du, this.mouseTracker.y_du + 1, 1, lineLength],
-      [this.mouseTracker.x_du + 1, this.mouseTracker.y_du, lineLength, 1],
-      [this.mouseTracker.x_du, this.mouseTracker.y_du + 1, 1, lineLength],
+      [
+        this.mouseTracker.x_du,
+        this.mouseTracker.y_du + lineThickness,
+        lineThickness,
+        lineLength,
+      ],
+      [
+        this.mouseTracker.x_du + lineThickness,
+        this.mouseTracker.y_du,
+        lineLength,
+        lineThickness,
+      ],
+      [
+        this.mouseTracker.x_du,
+        this.mouseTracker.y_du,
+        lineThickness,
+        lineLength + 1,
+      ],
       [
         this.mouseTracker.x_du - lineLength,
         this.mouseTracker.y_du,
         lineLength,
-        1,
+        lineThickness,
       ],
       [
         this.mouseTracker.x_du,
         this.mouseTracker.y_du - lineLength,
-        1,
+        lineThickness,
         lineLength,
       ],
     ];
+
+    if (this.mouseTracker.cursorType === 'pointer') {
+      this.ctx.fillStyle = rgbToString([0, 0, 0]);
+      lines
+        .map(
+          ([x, y, ...rest]) =>
+            [x + lineThickness, y + lineThickness, ...rest] as line
+        )
+        .forEach((line) => this.drawingTools.fillRect_du(...line));
+    }
+
+    this.ctx.fillStyle = generateRandomColors(0.85);
 
     lines.forEach((line) => this.drawingTools.fillRect_du(...line));
   }

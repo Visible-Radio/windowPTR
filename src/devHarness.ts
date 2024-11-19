@@ -5,7 +5,7 @@ const colorArr = [10, 100, 254] as rgb8Bit;
 const color = rgbToString(colorArr);
 
 const borgText = `
-<span color=${color} onClick=outermostOnClick>  
+<span color=${color}>  
   <span highlight=true>
     <span>Resistance</span>
     <span highlight=false outline=true>is</span>
@@ -20,11 +20,17 @@ const borgText = `
       <span blink=true>G</span>
     </span>
     . Lower your shields and surrender your ships. We will add your biological and technological distinctiveness
-    <span color=rgb(190,120,0) onClick=yellowOnClick>
+    <span color=rgb(190,120,0) onClick=myClickTestFn>
       to our own. Your culture will adapt to
     </span>
     service us.
   </p>
+</span>
+`;
+
+const xMarksTheSpot = `
+<span blink=true onClick=myClickTestFn>
+x
 </span>
 `;
 
@@ -36,16 +42,19 @@ const withColor = (text: string) =>
   </span>`;
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
-  scale: 3,
-  documentSource: withColor(
-    'hello this is my text that I put in here for you all to read.'
-  ),
+  scale: 10,
+  documentSource: withColor(xMarksTheSpot),
   characterResolution: 'all',
-  displayRows: 12,
-  // displayColumns: 24,
+  displayRows: 1,
+  displayColumns: 1,
   borderColor: [0, 0, 0],
   idExtension: '1',
   drawBoundingBoxes: true,
+  functions: {
+    myClickTestFn: (ptr) => {
+      ptr.letters.list[0].setState('GLITCHING');
+    },
+  },
 }).run();
 
 declare global {
