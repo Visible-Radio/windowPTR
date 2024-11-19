@@ -42,17 +42,17 @@ const withColor = (text: string) =>
   </span>`;
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
-  scale: 10,
-  documentSource: withColor(xMarksTheSpot),
+  scale: 4,
+  documentSource: borgText,
   characterResolution: 'all',
-  displayRows: 1,
-  displayColumns: 1,
+  displayRows: 12,
+  // displayColumns: 1,
   borderColor: [0, 0, 0],
   idExtension: '1',
   drawBoundingBoxes: true,
   functions: {
     myClickTestFn: (ptr) => {
-      ptr.letters.list[0].setState('GLITCHING');
+      ptr.letters.list.forEach((lett) => lett.setState('GLITCHING'));
     },
   },
 }).run();

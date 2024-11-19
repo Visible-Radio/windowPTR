@@ -171,7 +171,8 @@ export class PTR {
     let lineThickness = 1;
     let lineLength = 2;
     if (this.mouseTracker.cursorType === 'pointer') {
-      lineLength *= 1.25;
+      lineLength *= 1.5;
+      lineThickness *= 1.5;
     }
 
     type line = [number, number, number, number];
@@ -217,9 +218,8 @@ export class PTR {
             [x + lineThickness, y + lineThickness, ...rest] as line
         )
         .forEach((line) => this.drawingTools.fillRect_du(...line));
+      this.ctx.fillStyle = generateRandomColors(0.9);
     }
-
-    this.ctx.fillStyle = generateRandomColors(0.85);
 
     lines.forEach((line) => this.drawingTools.fillRect_du(...line));
   }
