@@ -1,3 +1,4 @@
+import { Blinking } from './lib/Letters/states';
 import { PTR } from './main';
 import { rgbToString } from './utils/rgbToString';
 import { rgb8Bit } from './utils/typeUtils/intRange';
@@ -28,12 +29,6 @@ const borgText = `
 </span>
 `;
 
-const xMarksTheSpot = `
-<span blink=true onClick=myClickTestFn>
-x
-</span>
-`;
-
 const withColor = (text: string) =>
   `<span>
     <span color=${color}>
@@ -42,17 +37,27 @@ const withColor = (text: string) =>
   </span>`;
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
-  scale: 4,
+  scale: 3,
   documentSource: borgText,
   characterResolution: 'all',
   displayRows: 12,
   // displayColumns: 1,
+
   borderColor: [0, 0, 0],
   idExtension: '1',
   drawBoundingBoxes: true,
   functions: {
-    myClickTestFn: (ptr) => {
-      ptr.letters.list.forEach((lett) => lett.setState('GLITCHING'));
+    myClickTestFn: (ptr, nodeLetters) => {
+      ptr.letters.list
+        .filter((lett) => !nodeLetters.includes(lett))
+        .forEach((lett) => lett.setState('GLITCHING'));
+      nodeLetters.forEach((lett) => {
+        if (lett.currentState instanceof Blinking) {
+          lett.setState('IDLE');
+        } else {
+          lett.setState('BLINKING');
+        }
+      });
     },
   },
 }).run();

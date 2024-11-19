@@ -3,7 +3,7 @@ import { rgbToString } from '../utils/rgbToString';
 import { rgb8Bit } from '../utils/typeUtils/intRange';
 import { DisplayMetrics } from './DisplayMetrics';
 import { Layout } from './Layout';
-import { Letters } from './Letters/Letters';
+import { Letters, Letter } from './Letters/Letters';
 import { ScrollHandler } from './ScrollHandler';
 import { MouseTracker } from './MouseTracker/MouseTracker';
 import { DisplayConfigOptions } from './calculateDisplayMetrics';
@@ -31,7 +31,7 @@ export class PTR {
   mouseTracker: MouseTracker;
   nodeMetaMap: NodeMetaMap;
   characterResolution: 'all' | 'single';
-  functions?: Record<string, (ptr: PTR) => void>;
+  functions?: Record<string, (ptr: PTR, letters: Letter[]) => void>;
 
   constructor(
     containerElement: HTMLDivElement,
@@ -40,7 +40,7 @@ export class PTR {
         documentSource: string;
         idExtension?: string;
         characterResolution?: 'all' | 'single';
-        functions?: Record<string, (ptr: PTR) => void>;
+        functions?: Record<string, (ptr: PTR, letters: Letter[]) => void>;
       }
     >
   ) {

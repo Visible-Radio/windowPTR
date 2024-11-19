@@ -1,5 +1,5 @@
 import { traverseReduce } from '../utils/traverseReduce';
-import { createBoundingBox, NodeMetaMap } from './NodeMetaMap/NodeMetaMap';
+import { createBoundingBox } from './NodeMetaMap/NodeMetaMap';
 import { PTR } from './PTR';
 import { AttributeMap, Text } from './parse/parser';
 

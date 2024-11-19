@@ -1,4 +1,6 @@
+import { traverseReduce } from '../../utils/traverseReduce';
 import { Point } from '../../utils/typeUtils/intRange';
+import { Letter } from '../Letters/Letters';
 import { BoundingBox } from '../NodeMetaMap/NodeMetaMap';
 import { Element, Node, Text } from '../parse/parser';
 import { PTR } from '../PTR';
@@ -91,11 +93,32 @@ export class MouseTracker {
     const onClick = this.hoveredNodes[0]?.attributes.onClick;
     if (onClick) {
       if (this.ptr.functions && onClick in this.ptr.functions) {
-        this.ptr.functions[onClick](this.ptr);
+        this.ptr.functions[onClick](
+          this.ptr,
+          this.getLettersFromElement(this.hoveredNodes[0])
+        );
       } else {
         console.warn(`Requested function call ${onClick} unavailable`);
       }
     }
+  }
+
+  getLettersFromElement(element: Element) {
+    return traverseReduce(
+      element,
+      (acc, node) => {
+        if (node instanceof Text) {
+          /* use the node to lookup letters from nodeMetaMap
+          and return the letters via the acc
+          */
+          const nodeMeta = this.ptr.nodeMetaMap.map.get(node);
+          if (!nodeMeta) return acc;
+          acc.push(...nodeMeta.letters);
+        }
+        return acc;
+      },
+      [] as Letter[]
+    );
   }
 }
 
@@ -105,7 +128,7 @@ function traverseAncestors<T extends (arg0: Node) => any>(
   node: Node,
   collectorFn: T,
   acc: Array<NonNullable<ReturnType<T>>> = []
-) {
+): Array<NonNullable<ReturnType<T>>> {
   const collectorResult = collectorFn(node);
   if (node.parent) {
     return traverseAncestors(

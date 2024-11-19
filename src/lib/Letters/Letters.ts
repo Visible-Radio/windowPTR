@@ -186,7 +186,11 @@ export class Letter {
   }
 
   update() {
-    if (this.currentState instanceof FirstDraw && this.currentState.done) {
+    if (
+      this.currentState instanceof FirstDraw &&
+      this.currentState.done &&
+      !this.attributes.blink
+    ) {
       this.setState('IDLE');
     } else if (
       this.previousLetter &&
@@ -201,7 +205,7 @@ export class Letter {
       this.currentState.done
     ) {
       this.setState('IDLE');
-    } else if (this.currentState instanceof Idle && this.attributes.blink) {
+    } else if (!(this.currentState instanceof Idle) && this.attributes.blink) {
       /* letters that should blink with this letter */
       const blinkingLetters = this.ptr.nodeMetaMap.getAllLettersForTextNode(
         this.node
