@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/Visible-Radio/windowPTR/compare/v1.2.3...v1.3.0) (2024-11-21)
+
+
+### Features
+
+* **i-29:** add onClick attribute... ([bae5f77](https://github.com/Visible-Radio/windowPTR/commit/bae5f77d1f2428a972a7a05d01ab061c3a01a641))
+* **i-29:** calculate and draw node bounding boxes ([ceae453](https://github.com/Visible-Radio/windowPTR/commit/ceae453821fea32e402065a9216e01b4ba3a9d39))
+* **i-29:** clicking roughed in ([773e9df](https://github.com/Visible-Radio/windowPTR/commit/773e9dfb04646feea254b732005b58d49ee8de80))
+* **i-29:** draw crosshair ([862f785](https://github.com/Visible-Radio/windowPTR/commit/862f78557a0927d69dc683e3af2658775da2522f))
+* **i-29:** expose Element's letters to onClick fn ([0b12a5e](https://github.com/Visible-Radio/windowPTR/commit/0b12a5e8cf3932237117052d71af931918d48cb7))
+* **i-29:** purge bounding boxes & layout objects after layout change ([365cb2e](https://github.com/Visible-Radio/windowPTR/commit/365cb2e48c182e844b76693eb779a3466f23272c))
+* **i-29:** think about it ([bbab919](https://github.com/Visible-Radio/windowPTR/commit/bbab919e7c64b584218a894560bd6f8e30e81423))
+* **i-29:** tweak cursor ([bad9fad](https://github.com/Visible-Radio/windowPTR/commit/bad9fadb3eea47e609019ab0d5a01085dcaf69fb))
+
 ## [1.2.3](https://github.com/Visible-Radio/windowPTR/compare/v1.2.2...v1.2.3) (2024-11-14)
 
 
