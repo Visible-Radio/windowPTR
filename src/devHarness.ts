@@ -1,4 +1,4 @@
-import { Blinking } from './lib/Letters/states';
+import { Blinking, Hover } from './lib/Letters/states';
 import { PTR } from './main';
 import { rgbToString } from './utils/rgbToString';
 import { rgb8Bit } from './utils/typeUtils/intRange';
@@ -10,7 +10,7 @@ const borgText = `
   <span highlight=true>
     <span>Resistance</span>
     <span highlight=false outline=true>is</span>
-    <span blink=true>futile</span>
+    <span hover:color=rgb(255,50,0) onClick=myClickTestFn>futile</span>
   </span>
   <p>
     We are the
@@ -21,7 +21,7 @@ const borgText = `
       <span blink=true>G</span>
     </span>
     . Lower your shields and surrender your ships. We will add your biological and technological distinctiveness
-    <span color=rgb(190,120,0) onClick=myClickTestFn>
+    <span>
       to our own. Your culture will adapt to
     </span>
     service us.
@@ -37,12 +37,13 @@ const withColor = (text: string) =>
   </span>`;
 
 const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
-  scale: 3,
+  scale: 2,
   documentSource: borgText,
   characterResolution: 'all',
-  displayRows: 12,
-  // displayColumns: 1,
-
+  displayRows: 9,
+  displayColumns: 24,
+  gridSpaceX_du: 0,
+  gridSpaceY_du: 0,
   borderColor: [0, 0, 0],
   idExtension: '1',
   drawBoundingBoxes: true,
@@ -52,7 +53,11 @@ const ptr = new PTR(document.getElementById('root') as HTMLDivElement, {
         .filter((lett) => !nodeLetters.includes(lett))
         .forEach((lett) => lett.setState('GLITCHING'));
       nodeLetters.forEach((lett) => {
-        if (lett.currentState instanceof Blinking) {
+        if (
+          lett.currentState instanceof Blinking ||
+          (lett.currentState instanceof Hover &&
+            lett.currentState.lastState instanceof Blinking)
+        ) {
           lett.setState('IDLE');
         } else {
           lett.setState('BLINKING');

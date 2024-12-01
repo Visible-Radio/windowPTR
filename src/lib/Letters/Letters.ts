@@ -1,7 +1,15 @@
 import { rgb8Bit } from '../../utils/typeUtils/intRange';
 import { PTR } from '../PTR';
 import { AttributeMap, Text } from '../parse/parser';
-import { Blinking, FirstDraw, Glitching, Hidden, Idle, States } from './states';
+import {
+  Blinking,
+  FirstDraw,
+  Glitching,
+  Hidden,
+  Hover,
+  Idle,
+  States,
+} from './states';
 
 export class Letters {
   list: Letter[];
@@ -152,6 +160,7 @@ export class Letter {
       IDLE: new Idle(this),
       GLITCHING: new Glitching(this),
       BLINKING: new Blinking(this),
+      HOVER: new Hover(this),
     };
     this.currentState = initialState
       ? this.states[initialState]
@@ -169,6 +178,7 @@ export class Letter {
   }
 
   setState(state: keyof typeof this.states) {
+    this.currentState.exit();
     this.states[state].enter();
   }
 

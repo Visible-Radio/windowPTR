@@ -22,3 +22,10 @@ export function generateRandomColors(alpha = 1) {
   const color = `rgba(${R},${G},${B},${alpha})`;
   return color;
 }
+
+export function generateRandomRgb8Bit() {
+  const R = random8Bit();
+  const G = random8Bit();
+  const B = random8Bit();
+  return [R, G, B];
+}

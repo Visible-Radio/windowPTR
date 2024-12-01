@@ -7,6 +7,7 @@ export type AttributeMap = {
   outline?: boolean | rgb8Bit;
   blink?: boolean;
   onClick?: 'string';
+  'hover:color'?: rgb8Bit | null;
 };
 
 const AttributeNamesArr = [
@@ -15,6 +16,7 @@ const AttributeNamesArr = [
   'outline',
   'blink',
   'onClick',
+  'hover:color',
 ] as const;
 
 export class Text {
@@ -200,6 +202,8 @@ export function parseTag(text: string): [string, AttributeMap] {
 
       if (
         (attributeName === 'color' && typeof attributeValue === 'string') ||
+        (attributeName === 'hover:color' &&
+          typeof attributeValue === 'string') ||
         (attributeName === 'outline' &&
           typeof coerceStringsToTypes(attributeValue) === 'string')
       ) {
@@ -208,7 +212,9 @@ export function parseTag(text: string): [string, AttributeMap] {
         /* parse strings matching that */
         /* yes this is all ugly */
         // @ts-expect-error can't be arsed to do this validation right now.
-        acc[attributeName] = attributeValue.match(/\d+/g);
+        acc[attributeName] = attributeValue
+          .match(/\d+/g)
+          ?.map((match) => Number(match));
       }
     }
     return acc;

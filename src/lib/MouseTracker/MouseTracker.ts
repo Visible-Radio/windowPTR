@@ -1,6 +1,7 @@
 import { traverseReduce } from '../../utils/traverseReduce';
 import { Point } from '../../utils/typeUtils/intRange';
 import { Letter } from '../Letters/Letters';
+import { Hover } from '../Letters/states';
 import { BoundingBox } from '../NodeMetaMap/NodeMetaMap';
 import { Element, Node, Text } from '../parse/parser';
 import { PTR } from '../PTR';
@@ -13,6 +14,7 @@ export class MouseTracker {
   y_du = 0;
   onScreen = false;
   hoveredNodes: Element[] = [];
+  hoveredLetters: Letter[] = [];
   cursorType: 'crossHair' | 'pointer' = 'crossHair';
   constructor(ptr: PTR) {
     this.ptr = ptr;
@@ -48,8 +50,31 @@ export class MouseTracker {
     this.y = event.offsetY;
     this.x_du = Math.round(this.x / this.ptr.dm.values.scale);
     this.y_du = Math.round(this.y / this.ptr.dm.values.scale);
-    this.hoveredNodes = this.getHoveredInteractiveElements();
-    if (this.hoveredNodes.length > 0) {
+
+    const newHoveredNodes = this.getHoveredInteractiveElements();
+    const newHoveredLetters = newHoveredNodes.length
+      ? this.getLettersFromElement(newHoveredNodes[0])
+      : [];
+
+    this.hoveredLetters.forEach((letter) => {
+      if (!newHoveredLetters.includes(letter)) {
+        letter.currentState.exit();
+      }
+    });
+
+    newHoveredLetters.forEach((letter) => {
+      if (!(letter.currentState instanceof Hover)) {
+        letter.setState('HOVER');
+      }
+    });
+
+    this.hoveredNodes = newHoveredNodes;
+    this.hoveredLetters = newHoveredLetters;
+    this.setCursorType();
+  }
+
+  setCursorType() {
+    if (this.hoveredNodes.length) {
       this.cursorType = 'pointer';
     } else {
       this.cursorType = 'crossHair';

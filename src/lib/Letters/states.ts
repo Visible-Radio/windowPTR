@@ -9,6 +9,7 @@ export type States = {
   IDLE: Idle;
   GLITCHING: Glitching;
   BLINKING: Blinking;
+  HOVER: Hover;
 };
 
 export interface LetterState {
@@ -37,6 +38,10 @@ class BaseLetterState {
         this.letter.letterIndex
       )
     );
+  }
+
+  exit() {
+    return undefined;
   }
 
   /** Note that _this_ getFrame() method expects the target width for transforming points,
@@ -215,7 +220,7 @@ export class Glitching extends BaseLetterState implements LetterState {
         const [r, g, b] = px.color;
         return {
           ...px,
-          color: [b, r, g],
+          color: [b, g, r],
         };
       });
   }
@@ -269,6 +274,71 @@ export class Blinking extends BaseLetterState implements LetterState {
 
 export function getSign() {
   return Math.random() > 0.5 ? -1 : 1;
+}
+
+export class Hover extends BaseLetterState implements LetterState {
+  lastState: States[keyof States] | null = null;
+  lastColor: rgb8Bit | null = null;
+  frames: rgb8Bit[] | null = null;
+  counter = 0;
+  transitionFrameCount = 10;
+
+  constructor(letter: Letter) {
+    super(letter);
+    if (this.letter.attributes['hover:color']) {
+      this.color = this.letter.attributes['hover:color'];
+    }
+  }
+
+  enter() {
+    if (this.letter.currentState instanceof Hover) return;
+    this.lastState = this.letter.currentState;
+    this.lastColor = this.lastState.color;
+    this.frames = this.getIncrementsToResolveDif() as unknown as rgb8Bit[];
+    this.letter.currentState = this.letter.states.HOVER;
+  }
+
+  exit() {
+    this.counter = 0;
+    this.lastState!.color = this.lastColor!;
+    this.letter.currentState = this.lastState!;
+    return undefined;
+  }
+
+  getColorDif() {
+    const dif = this.color.map(
+      (channel, i) => channel - (this.lastColor?.[i] ?? 0)
+    );
+    return dif;
+  }
+
+  getIncrementsToResolveDif() {
+    const dif = this.getColorDif();
+    const signs = dif.map((difChannel) => (difChannel > 0 ? 1 : -1));
+
+    const arr = new Array(this.transitionFrameCount).fill(
+      this.lastColor?.slice(0, 3)
+    ) as rgb8Bit[];
+    return arr.map((rgbColorArray, transitionFrameIndex) => {
+      const progress = (transitionFrameIndex + 1) / this.transitionFrameCount;
+
+      return rgbColorArray.map((channel, channelIndex) => {
+        const channelDif = Math.abs(dif[channelIndex]);
+        const incAmount = Math.ceil(progress * channelDif);
+        return channel + incAmount * signs[channelIndex];
+      });
+    });
+  }
+
+  getFrame(deltaTime: number): Pixel[] {
+    if (this.counter < this.transitionFrameCount) {
+      const nextColor = this.frames![this.counter]!;
+      this.lastState!.color = nextColor;
+      this.counter++;
+    }
+
+    return this.lastState!.getFrame(deltaTime);
+  }
 }
 
 function scaleColor(color: rgb8Bit, factor: number): rgb8Bit {
